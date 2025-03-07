@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ClinicFormInputs, ClinicSchema } from "@/models/user";
+import { ClinicFormInputs, ClinicSchema } from "@/models/clinic";
+import { LocationSchema } from "@/models/location";
 import { Input } from "@/components/ui/input";
 import { MaskedInput } from "../ui/maked-input";
 import { Button } from "@/components/ui/button";
@@ -11,146 +12,244 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useViaCep } from "@/hooks/useViaCep";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription } from "@/components/ui/alert-dialog";
+import { z } from "zod";
+
+// Combinando os schemas para criar um formulário completo
+const FormSchema = ClinicSchema.extend({
+    location: LocationSchema
+});
+
+// Tipo para o formulário combinado
+type FormInputs = z.infer<typeof FormSchema>;
 
 export default function RegisterClinicSteps() {
     const [currentStep, setCurrentStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorDialog, setErrorDialog] = useState<string | null>(null);
+    const [semNumero, setSemNumero] = useState(false);
 
     const {
         register,
         handleSubmit,
         setValue,
         watch,
-        formState: { errors },
-    } = useForm<ClinicFormInputs>({
-        resolver: zodResolver(ClinicSchema),
+        formState: { errors, isValid },
+    } = useForm<FormInputs>({
+        resolver: zodResolver(FormSchema),
         mode: "onChange",
         defaultValues: {
+            trade_name: "",
+            legal_name: "",
+            cnpj: "",
             address: "",
             zip_code: "",
             phone_number: "",
-            bot_phone: "",
+            location: {
+                zip_code: "",
+                address: "",
+                number: "",
+                city: "",
+                state: "",
+                country: "Brasil",
+                complement: "",
+            },
         },
     });
 
-    const cepValue = watch("zip_code") || "";
-    const numeroValue = watch("numero") || "";
-    const semNumero = watch("sem_numero");
-
+    const cepValue = watch("location.zip_code") || "";
     const { address, loading, error } = useViaCep(cepValue);
 
     useEffect(() => {
         if (address) {
-            const numero = semNumero ? "S/N" : numeroValue;
-            const fullAddress = `${address.logradouro}, ${numero} - ${address.bairro}, ${address.localidade} - ${address.uf}`;
-            setValue("address", fullAddress, { shouldValidate: true });
+            console.log("🟢 Endereço encontrado na API:", address);
+            setValue("location.address", address.logradouro || "", { shouldValidate: true });
+            setValue("location.city", address.localidade || "", { shouldValidate: true });
+            setValue("location.state", address.uf || "", { shouldValidate: true });
+            setValue("address", `${address.logradouro}, ${semNumero ? "S/N" : watch("location.number")} - ${address.bairro}, ${address.localidade} - ${address.uf}`, { shouldValidate: true });
+            setValue("zip_code", cepValue.replace(/\D/g, ""), { shouldValidate: true });
         }
-    }, [address, semNumero, numeroValue, setValue]);
+    }, [address, semNumero, setValue, watch, cepValue]);
 
-    const onSubmit = async (data: ClinicFormInputs) => {
+    const onSubmit = async (data: FormInputs) => {
+
         setIsSubmitting(true);
+        console.log("🟡 Tentando enviar formulário com os dados:", data);
+
         try {
-            console.log("🟢 Dados da clínica enviados:", data);
+            const finalData = {
+                ...data,
+                location: {
+                    ...data.location,
+                    number: semNumero ? "S/N" : data.location.number,
+                },
+            };
+            console.log("🟢 Dados da clínica preparados para envio:", finalData);
             await new Promise((resolve) => setTimeout(resolve, 1500));
             alert("✅ Cadastro realizado com sucesso!");
             setCurrentStep(1);
         } catch (error) {
+            console.error("🔴 Erro ao enviar:", error);
             setErrorDialog("Erro ao cadastrar. Tente novamente.");
         } finally {
             setIsSubmitting(false);
+            console.log("🔵 Submissão finalizada.");
+        }
+    };
+
+    const handleNextStep = () => {
+        if (currentStep === 1) {
+            // Validar apenas os campos do passo 1
+            if (!errors.trade_name && !errors.legal_name && !errors.cnpj &&
+                watch("trade_name") && watch("legal_name") && watch("cnpj")) {
+                setCurrentStep(2);
+            } else {
+                setErrorDialog("Por favor, preencha todos os campos obrigatórios corretamente.");
+            }
         }
     };
 
     return (
-        <div className="flex">
+        <div className="flex justify-center w-full">
             <Card className="w-full max-w-2xl shadow-2xl border border-border bg-card text-card-foreground transition-all duration-300">
                 <CardContent className="p-6 space-y-4">
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
                         {currentStep === 1 && (
-                            <>
-                                {/* Step 1: Dados Básicos */}
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <Label className="text-lg font-bold">Nome Fantasia</Label>
-                                        <Input {...register("trade_name")} placeholder="Digite seu nome fantasia" className="text-lg px-4 py-2" />
-                                        {errors.trade_name && <p className="text-red-500 text-sm">{errors.trade_name.message}</p>}
-                                    </div>
-
-                                    <div>
-                                        <Label className="text-lg font-bold">Razão Social</Label>
-                                        <Input {...register("legal_name")} placeholder="Digite sua razão social" className="text-lg px-4 py-2" />
-                                        {errors.legal_name && <p className="text-red-500 text-sm">{errors.legal_name.message}</p>}
-                                    </div>
+                            <div className="space-y-4">
+                                <div>
+                                    <Label className="text-lg font-bold">Nome Fantasia</Label>
+                                    <Input {...register("trade_name")} placeholder="Nome Fantasia" />
+                                    {errors.trade_name && <p className="text-red-500 text-sm">{errors.trade_name.message}</p>}
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <Label className="text-lg font-bold">CNPJ</Label>
-                                        <MaskedInput mask="XX.XXX.XXX/XXXX-XX" replacement={{ X: /\d/ }} {...register("cnpj")} error={errors.cnpj?.message} />
-                                    </div>
-
-                                    <div>
-                                        <Label className="text-lg font-bold">Telefone</Label>
-                                        <MaskedInput mask="(XX) XXXXX-XXXX" replacement={{ X: /\d/ }} {...register("phone_number")} error={errors.phone_number?.message} />
-                                    </div>
+                                <div>
+                                    <Label className="text-lg font-bold">Razão Social</Label>
+                                    <Input {...register("legal_name")} placeholder="Razão Social" />
+                                    {errors.legal_name && <p className="text-red-500 text-sm">{errors.legal_name.message}</p>}
                                 </div>
 
-                                <div className="flex justify-end">
-                                    <Button type="button" onClick={() => setCurrentStep(2)} className="w-auto text-lg font-semibold py-3 px-6">
-                                        Próximo
-                                    </Button>
+                                <div>
+                                    <Label className="text-lg font-bold">CNPJ</Label>
+                                    <MaskedInput
+                                        mask="XX.XXX.XXX/XXXX-XX"
+                                        replacement={{ X: /\d/ }}
+                                        {...register("cnpj")}
+                                        error={errors.cnpj?.message}
+                                    />
                                 </div>
-                            </>
+
+                                <div>
+                                    <Label className="text-lg font-bold">Telefone</Label>
+                                    <MaskedInput
+                                        mask="(XX) XXXXX-XXXX"
+                                        replacement={{ X: /\d/ }}
+                                        {...register("phone_number")}
+                                        error={errors.phone_number?.message}
+                                    />
+                                </div>
+
+                                <Button
+                                    type="button"
+                                    onClick={handleNextStep}
+                                    className="w-full mt-4"
+                                >
+                                    Próximo
+                                </Button>
+                            </div>
                         )}
 
                         {currentStep === 2 && (
-                            <>
-                                {/* Step 2: Endereço */}
-                                <div className="space-y-2">
+                            <div className="space-y-4">
+                                <div>
                                     <Label className="text-lg font-bold">CEP</Label>
-                                    <MaskedInput mask="XXXXX-XXX" replacement={{ X: /\d/ }} {...register("zip_code")} error={errors.zip_code?.message} />
+                                    <MaskedInput
+                                        mask="XXXXX-XXX"
+                                        replacement={{ X: /\d/ }}
+                                        {...register("location.zip_code")}
+                                        error={errors.location?.zip_code?.message}
+                                    />
                                     {loading && <p className="text-primary">Buscando endereço...</p>}
                                     {error && <p className="text-red-500">{error}</p>}
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <Label className="text-lg font-bold">Endereço</Label>
-                                        <Input {...register("address")} placeholder="Endereço" className="text-lg px-4 py-2" disabled />
-                                    </div>
-                                    <div className="flex items-center">
-                                        <div className="w-full">
-                                            <Label className="text-lg font-bold">Número</Label>
-                                            <Input {...register("numero")} placeholder="Número" className="text-lg px-4 py-2" disabled={semNumero} />
-                                        </div>
-                                        <div className="flex items-center ml-2">
-                                            <input type="checkbox" id="sem_numero" className="h-5 w-5" {...register("sem_numero")} />
-                                            <Label htmlFor="sem_numero" className="ml-2 text-lg font-bold">S/N</Label>
-                                        </div>
-                                    </div>
+                                <div>
+                                    <Label className="text-lg font-bold">Cidade</Label>
+                                    <Input {...register("location.city")} placeholder="Cidade" disabled={!!address} />
+                                    {errors.location?.city && <p className="text-red-500 text-sm">{errors.location.city.message}</p>}
                                 </div>
 
                                 <div>
-                                    <Label className="text-lg font-bold">Complemento (Opcional)</Label>
-                                    <Input {...register("complemento")} placeholder="Complemento" className="text-lg px-4 py-2" />
+                                    <Label className="text-lg font-bold">Estado</Label>
+                                    <Input {...register("location.state")} placeholder="UF" disabled={!!address} />
+                                    {errors.location?.state && <p className="text-red-500 text-sm">{errors.location.state.message}</p>}
                                 </div>
 
-                                <div className="flex justify-between">
-                                    <Button type="button" onClick={() => setCurrentStep(1)} className="w-auto text-lg font-semibold py-3 px-6">
+                                <div>
+                                    <Label className="text-lg font-bold">Endereço</Label>
+                                    <Input {...register("location.address")} placeholder="Endereço" disabled={!!address} />
+                                    {errors.location?.address && <p className="text-red-500 text-sm">{errors.location.address.message}</p>}
+                                </div>
+
+                                <div>
+                                    <Label className="text-lg font-bold">Número</Label>
+                                    <div className="flex items-center gap-2">
+                                        <Input
+                                            {...register("location.number")}
+                                            placeholder="Número"
+                                            disabled={semNumero}
+                                        />
+                                        <div className="flex items-center gap-1">
+                                            <input
+                                                type="checkbox"
+                                                id="sem-numero"
+                                                checked={semNumero}
+                                                onChange={(e) => {
+                                                    setSemNumero(e.target.checked);
+                                                    if (e.target.checked) {
+                                                        setValue("location.number", "S/N", { shouldValidate: true });
+                                                    } else {
+                                                        setValue("location.number", "", { shouldValidate: true });
+                                                    }
+                                                }}
+                                                className="mr-1"
+                                            />
+                                            <label htmlFor="sem-numero">S/N</label>
+                                        </div>
+                                    </div>
+                                    {errors.location?.number && <p className="text-red-500 text-sm">{errors.location.number.message}</p>}
+                                </div>
+
+                                <div>
+                                    <Label className="text-lg font-bold">Complemento</Label>
+                                    <Input
+                                        {...register("location.complement")}
+                                        placeholder="Complemento (opcional)"
+                                    />
+                                </div>
+
+                                <div className="flex gap-2 pt-4">
+                                    <Button
+                                        type="button"
+                                        onClick={() => setCurrentStep(1)}
+                                        className="flex-1"
+                                        variant="outline"
+                                    >
                                         Voltar
                                     </Button>
-                                    <Button type="submit" className="w-auto text-lg font-semibold py-3 px-6 hover:bg-primary-dark">
+                                    <Button
+                                        type="submit"
+                                        disabled={!isValid || isSubmitting}
+                                        className="flex-1"
+                                    >
                                         {isSubmitting ? "Enviando..." : "Criar Conta"}
                                     </Button>
                                 </div>
-                            </>
+                            </div>
                         )}
                     </form>
                 </CardContent>
             </Card>
 
-            {/* Modal de Erro */}
             {errorDialog && (
                 <AlertDialog open={!!errorDialog} onOpenChange={(open) => !open && setErrorDialog(null)}>
                     <AlertDialogContent>
@@ -158,6 +257,12 @@ export default function RegisterClinicSteps() {
                             <AlertDialogTitle>Erro no Cadastro</AlertDialogTitle>
                             <AlertDialogDescription>{errorDialog}</AlertDialogDescription>
                         </AlertDialogHeader>
+                        <Button
+                            onClick={() => setErrorDialog(null)}
+                            className="mt-4"
+                        >
+                            Fechar
+                        </Button>
                     </AlertDialogContent>
                 </AlertDialog>
             )}
