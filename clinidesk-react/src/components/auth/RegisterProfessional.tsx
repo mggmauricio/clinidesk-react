@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { HealthProfessionalSchema } from "@/models/health_professional";
-import { LocationSchema } from "@/models/location";
+import { HealthProfessionalSchema } from "@/schemas/health_professional";
+import { LocationSchema } from "@/schemas/location";
 import { Input } from "@/components/ui/input";
 import { MaskedInput } from "../ui/maked-input";
 import { Button } from "@/components/ui/button";

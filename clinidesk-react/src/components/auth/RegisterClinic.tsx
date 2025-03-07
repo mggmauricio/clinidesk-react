@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ClinicFormInputs, ClinicSchema } from "@/models/clinic";
-import { LocationSchema } from "@/models/location";
+import { ClinicFormInputs, ClinicSchema } from "@/schemas/clinic";
+import { LocationSchema } from "@/schemas/location";
 import { Input } from "@/components/ui/input";
 import { MaskedInput } from "../ui/maked-input";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,12 @@ import { Label } from "@/components/ui/label";
 import { useViaCep } from "@/hooks/useViaCep";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription } from "@/components/ui/alert-dialog";
 import { z } from "zod";
-
+import { createClinic } from "@/services/clinics"; // ✅ Importando o serviço
+import { useRouter } from "next/navigation"; // ✅ Para redirecionar após sucesso
+import { createLocation } from "@/services/locations";
 // Combinando os schemas para criar um formulário completo
+
+
 const FormSchema = ClinicSchema.extend({
     location: LocationSchema
 });
@@ -23,6 +27,8 @@ const FormSchema = ClinicSchema.extend({
 type FormInputs = z.infer<typeof FormSchema>;
 
 export default function RegisterClinicSteps() {
+    const router = useRouter(); // ✅ Criando o roteador para redirecionamento
+
     const [currentStep, setCurrentStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorDialog, setErrorDialog] = useState<string | null>(null);
@@ -71,22 +77,49 @@ export default function RegisterClinicSteps() {
     }, [address, semNumero, setValue, watch, cepValue]);
 
     const onSubmit = async (data: FormInputs) => {
-
         setIsSubmitting(true);
         console.log("🟡 Tentando enviar formulário com os dados:", data);
 
         try {
-            const finalData = {
-                ...data,
-                location: {
-                    ...data.location,
-                    number: semNumero ? "S/N" : data.location.number,
-                },
+            // 🔹 Formatando os dados para Location
+            const locationData = {
+                zip_code: data.location.zip_code.replace(/\D/g, ""), // Remove caracteres não numéricos
+                address: data.location.address.trim(),
+                number: semNumero ? "S/N" : data.location.number.trim(),
+                city: data.location.city.trim(),
+                state: data.location.state.trim(),
+                country: "Brasil",
+                complement: data.location.complement?.trim() || "",
             };
-            console.log("🟢 Dados da clínica preparados para envio:", finalData);
-            await new Promise((resolve) => setTimeout(resolve, 1500));
+
+            console.log("🟢 Criando localização:", locationData);
+            const createdLocation = await createLocation(locationData);
+
+            if (!createdLocation || !createdLocation.id) {
+                throw new Error("Erro ao criar localização.");
+            }
+
+            console.log("✅ Localização criada com ID:", createdLocation.id);
+
+            // 🔹 Criando os dados da clínica
+            const clinicData = {
+                trade_name: data.trade_name.trim(),
+                legal_name: data.legal_name.trim(),
+                cnpj: data.cnpj.replace(/\D/g, ""), // Remove caracteres não numéricos
+                phone_number: data.phone_number.replace(/\D/g, ""),
+                bot_phone: data.bot_phone || null,
+                location_id: createdLocation.id, // ✅ Associando Location à Clinic
+            };
+
+            console.log("🟢 Criando clínica:", clinicData);
+            const createdClinic = await createClinic(clinicData);
+
+            if (!createdClinic) {
+                throw new Error("Erro ao criar clínica.");
+            }
+
             alert("✅ Cadastro realizado com sucesso!");
-            setCurrentStep(1);
+            router.push("/clinics");
         } catch (error) {
             console.error("🔴 Erro ao enviar:", error);
             setErrorDialog("Erro ao cadastrar. Tente novamente.");
@@ -95,6 +128,7 @@ export default function RegisterClinicSteps() {
             console.log("🔵 Submissão finalizada.");
         }
     };
+
 
     const handleNextStep = () => {
         if (currentStep === 1) {
