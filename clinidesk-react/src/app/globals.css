@@ -11,10 +11,10 @@
   --card-foreground: #1a1c19;
   --popover: #f9faf5;
   --popover-foreground: #1a1c19;
-  --primary: #096b56;
-  --primary-foreground: #ffffff;
-  --secondary: #47645a;
-  --secondary-foreground: #ffffff;
+  --primary: #85d6bc;
+  --primary-foreground: #00382c;
+  --secondary: #aecdc1;
+  --secondary-foreground: #19362d;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
   --accent: #625691;
@@ -23,21 +23,21 @@
   --destructive-foreground: #ffffff;
   --border: #e2e8f0;
   --input: #e2e8f0;
-  --ring: #096b56;
-  --chart-1: #73c4ab;
-  --chart-2: #47645a;
+  --ring: #85d6bc;
+  --chart-1: #85d6bc;
+  --chart-2: #aecdc1;
   --chart-3: #625691;
   --chart-4: #767874;
   --chart-5: #aecdc1;
   --radius: 0.625rem;
   --sidebar: #f9faf5;
   --sidebar-foreground: #1a1c19;
-  --sidebar-primary: #096b56;
-  --sidebar-primary-foreground: #ffffff;
+  --sidebar-primary: #85d6bc;
+  --sidebar-primary-foreground: #00382c;
   --sidebar-accent: #625691;
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #e2e8f0;
-  --sidebar-ring: #096b56;
+  --sidebar-ring: #85d6bc;
 }
 
 /* === Modo Escuro === */
@@ -48,10 +48,10 @@
   --card-foreground: #e2e3de;
   --popover: #1e201d;
   --popover-foreground: #e2e3de;
-  --primary: #85d6bc;
-  --primary-foreground: #00382c;
-  --secondary: #aecdc1;
-  --secondary-foreground: #19362d;
+  --primary: #096b56;
+  --primary-foreground: #ffffff;
+  --secondary: #47645a;
+  --secondary-foreground: #ffffff;
   --muted: #1e293b;
   --muted-foreground: #94a3b8;
   --accent: #ccbeff;
@@ -60,20 +60,20 @@
   --destructive-foreground: #690005;
   --border: #3f3f46;
   --input: #3f3f46;
-  --ring: #85d6bc;
-  --chart-1: #85d6bc;
-  --chart-2: #aecdc1;
+  --ring: #096b56;
+  --chart-1: #73c4ab;
+  --chart-2: #47645a;
   --chart-3: #ccbeff;
   --chart-4: #e2e3de;
   --chart-5: #767874;
   --sidebar: #111411;
   --sidebar-foreground: #e2e3de;
-  --sidebar-primary: #85d6bc;
-  --sidebar-primary-foreground: #00382c;
+  --sidebar-primary: #096b56;
+  --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #ccbeff;
   --sidebar-accent-foreground: #33275f;
   --sidebar-border: #3f3f46;
-  --sidebar-ring: #85d6bc;
+  --sidebar-ring: #096b56;
 }
 
 /* === Modo Neon === */

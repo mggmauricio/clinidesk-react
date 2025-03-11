@@ -44,6 +44,9 @@ export default function RegisterClinicSteps() {
         resolver: zodResolver(FormSchema),
         mode: "onChange",
         defaultValues: {
+            username: "",
+            password: "",
+            email: "",
             trade_name: "",
             legal_name: "",
             cnpj: "",
@@ -81,7 +84,6 @@ export default function RegisterClinicSteps() {
         console.log("🟡 Tentando enviar formulário com os dados:", data);
 
         try {
-            // 🔹 Formatando os dados para Location
             const locationData = {
                 zip_code: data.location.zip_code.replace(/\D/g, ""), // Remove caracteres não numéricos
                 address: data.location.address.trim(),
@@ -101,7 +103,6 @@ export default function RegisterClinicSteps() {
 
             console.log("✅ Localização criada com ID:", createdLocation.id);
 
-            // 🔹 Criando os dados da clínica
             const clinicData = {
                 trade_name: data.trade_name.trim(),
                 legal_name: data.legal_name.trim(),
@@ -131,15 +132,7 @@ export default function RegisterClinicSteps() {
 
 
     const handleNextStep = () => {
-        if (currentStep === 1) {
-            // Validar apenas os campos do passo 1
-            if (!errors.trade_name && !errors.legal_name && !errors.cnpj &&
-                watch("trade_name") && watch("legal_name") && watch("cnpj")) {
-                setCurrentStep(2);
-            } else {
-                setErrorDialog("Por favor, preencha todos os campos obrigatórios corretamente.");
-            }
-        }
+        setCurrentStep((prev) => prev + 1);
     };
 
     return (
@@ -147,8 +140,34 @@ export default function RegisterClinicSteps() {
             <Card className="w-full max-w-2xl shadow-2xl border border-border bg-card text-card-foreground transition-all duration-300">
                 <CardContent className="p-6 space-y-4">
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                        {currentStep == 1 && (
+                            <div className="space-y-4">
+                                <Label className="text-lg font-bold">Usuário</Label>
+                                <Input {...register("username")} placeholder="Usuário" />
+                                {errors.username && <p className="text-red-500 text-sm">{errors.username.message}</p>}
 
-                        {currentStep === 1 && (
+                                <Label className="text-lg font-bold">Email</Label>
+                                <Input {...register("email")} placeholder="Email" />
+                                {errors.email && <p className="text-red-500">{errors.email.message}</p>}
+
+
+
+                                <Label className="text-lg font-bold">Senha</Label>
+                                <Input type="password"{...register("password")} placeholder="Senha" />
+                                {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+
+
+                                <Button
+                                    type="button"
+                                    onClick={handleNextStep}
+                                    className="w-full mt-4"
+                                >
+                                    Próximo
+                                </Button>
+                            </div>
+                        )}
+
+                        {currentStep === 2 && (
                             <div className="space-y-4">
                                 <div>
                                     <Label className="text-lg font-bold">Nome Fantasia</Label>
@@ -192,7 +211,7 @@ export default function RegisterClinicSteps() {
                             </div>
                         )}
 
-                        {currentStep === 2 && (
+                        {currentStep === 3 && (
                             <div className="space-y-4">
                                 <div>
                                     <Label className="text-lg font-bold">CEP</Label>

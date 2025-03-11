@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { Sun, Moon, Zap } from "lucide-react";
 
 const themes = [
-    { name: "Claro", value: "light", icon: "☀️" },
-    { name: "Escuro", value: "dark", icon: "🌙" },
-    { name: "Neon", value: "neon", icon: "⚡" },
+    { name: "Claro", value: "light", icon: <Sun className="h-4 w-4" /> },
+    { name: "Escuro", value: "dark", icon: <Moon className="h-4 w-4" /> },
+    { name: "Neon", value: "neon", icon: <Zap className="h-4 w-4" /> },
 ];
 
 export default function ThemeToggle() {
@@ -25,19 +26,20 @@ export default function ThemeToggle() {
     };
 
     return (
-        <div className="flex items-center bg-muted/20 p-1 rounded-lg space-x-1">
+        <div className="flex items-center bg-transparent rounded-lg space-x-1 border border-[rgba(0,0,0,0.1)] dark:border-[rgba(255,255,255,0.1)]">
             {themes.map((t) => (
                 <button
                     key={t.value}
                     onClick={() => changeTheme(t.value)}
                     className={cn(
-                        "px-3 py-1 rounded-md text-sm font-medium transition-colors duration-200",
+                        "p-2 rounded-md transition-all duration-200 flex items-center justify-center",
                         theme === t.value
-                            ? "bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2 ring-offset-surface"
-                            : "bg-transparent hover:bg-muted"
+                            ? "bg-[rgba(0,0,0,0.05)] dark:bg-[rgba(255,255,255,0.1)] text-primary"
+                            : "bg-transparent hover:bg-[rgba(0,0,0,0.03)] dark:hover:bg-[rgba(255,255,255,0.05)]"
                     )}
+                    title={t.name}
                 >
-                    {t.icon} {t.name}
+                    {t.icon}
                 </button>
             ))}
         </div>
