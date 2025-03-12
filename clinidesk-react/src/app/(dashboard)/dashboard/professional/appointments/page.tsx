@@ -790,6 +790,7 @@ export default function ProfessionalAppointmentsPage() {
                                     type="time"
                                     value={tempWorkHours.startTime}
                                     onChange={(e) => setTempWorkHours({ ...tempWorkHours, startTime: e.target.value })}
+                                    lang="pt-BR"
                                 />
                                 <p className="text-xs text-muted-foreground">Formato 24h (ex: 07:00)</p>
                             </div>
@@ -800,6 +801,7 @@ export default function ProfessionalAppointmentsPage() {
                                     type="time"
                                     value={tempWorkHours.endTime}
                                     onChange={(e) => setTempWorkHours({ ...tempWorkHours, endTime: e.target.value })}
+                                    lang="pt-BR"
                                 />
                                 <p className="text-xs text-muted-foreground">Formato 24h (ex: 19:00)</p>
                             </div>

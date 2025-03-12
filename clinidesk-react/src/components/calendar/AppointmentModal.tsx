@@ -22,9 +22,17 @@ import {
     SelectTrigger,
     SelectValue
 } from '@/components/ui/select';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from '@/lib/utils';
 import { AppointmentEvent } from './AppointmentCalendar';
-import { Calendar, Clock, User, FileText, Tag } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, User, FileText, Tag, ChevronDown, Type, FileDigit, AlertCircle } from 'lucide-react';
+import { Calendar } from "@/components/ui/calendar";
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 // Duração das consultas em minutos
 const DURATION_OPTIONS = [
@@ -35,6 +43,16 @@ const DURATION_OPTIONS = [
     { value: 90, label: '1 hora e 30 minutos' },
     { value: 120, label: '2 horas' }
 ];
+
+// Opções de horários em intervalos de 15 minutos
+const TIME_OPTIONS = Array.from({ length: 24 * 4 }, (_, i) => {
+    const hour = Math.floor(i / 4);
+    const minute = (i % 4) * 15;
+    return {
+        value: `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
+        label: `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
+    };
+});
 
 interface AppointmentModalProps {
     isOpen: boolean;
@@ -88,7 +106,7 @@ export default function AppointmentModal({
             setFormData({
                 ...appointment,
                 extendedProps: {
-                    ...appointment.extendedProps
+                    ...(appointment.extendedProps || {})
                 }
             });
 
@@ -146,11 +164,9 @@ export default function AppointmentModal({
 
     // Atualizar datas quando o usuário selecionar data, hora ou duração
     useEffect(() => {
-        if (selectedDate && selectedTime) {
-            const [hours, minutes] = selectedTime.split(':').map(Number);
+        if (selectedDate) {
+            // Se selectedDate já inclui a hora (do DatePicker)
             const startDate = new Date(selectedDate);
-            startDate.setHours(hours, minutes, 0, 0);
-
             const endDate = addMinutes(startDate, selectedDuration);
 
             setFormData(prev => {
@@ -162,7 +178,15 @@ export default function AppointmentModal({
                 };
             });
         }
-    }, [selectedDate, selectedTime, selectedDuration]);
+    }, [selectedDate, selectedDuration]);
+
+    // Função para lidar com a mudança de data e hora no DatePicker
+    const handleDateTimeChange = (date: Date | null) => {
+        if (date) {
+            setSelectedDate(date);
+            setSelectedTime(format(date, 'HH:mm'));
+        }
+    };
 
     // Manipular mudanças nos campos do formulário
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -175,7 +199,7 @@ export default function AppointmentModal({
                 return {
                     ...prev,
                     [parent]: {
-                        ...prev[parent as keyof typeof prev],
+                        ...(prev[parent as keyof typeof prev] as Record<string, unknown> || {}),
                         [child]: value
                     }
                 };
@@ -205,7 +229,7 @@ export default function AppointmentModal({
                             ...prev,
                             title: `Consulta - ${patient.name}`,
                             extendedProps: {
-                                ...prev.extendedProps,
+                                ...(prev.extendedProps || {}),
                                 patientId: value,
                                 patientName: patient.name
                             }
@@ -220,7 +244,7 @@ export default function AppointmentModal({
                             ...prev,
                             backgroundColor: appointmentType.color,
                             extendedProps: {
-                                ...prev.extendedProps,
+                                ...(prev.extendedProps || {}),
                                 type: value
                             }
                         };
@@ -232,7 +256,7 @@ export default function AppointmentModal({
                         return {
                             ...prev,
                             extendedProps: {
-                                ...prev.extendedProps,
+                                ...(prev.extendedProps || {}),
                                 healthPlan: undefined,
                                 isPrivate: true
                             }
@@ -243,7 +267,7 @@ export default function AppointmentModal({
                             return {
                                 ...prev,
                                 extendedProps: {
-                                    ...prev.extendedProps,
+                                    ...(prev.extendedProps || {}),
                                     healthPlan,
                                     isPrivate: false
                                 }
@@ -253,19 +277,22 @@ export default function AppointmentModal({
                 }
 
                 if (child === 'status') {
+                    // Garantir que o status seja um dos valores permitidos
+                    const status = value as 'confirmed' | 'pending' | 'cancelled' | 'completed';
                     return {
                         ...prev,
                         extendedProps: {
-                            ...prev.extendedProps,
-                            status: value
+                            ...(prev.extendedProps || {}),
+                            status
                         }
                     };
                 }
 
+                // Fallback para outros campos
                 return {
                     ...prev,
                     [parent]: {
-                        ...prev[parent as keyof typeof prev],
+                        ...(prev[parent as keyof typeof prev] as Record<string, unknown> || {}),
                         [child]: value
                     }
                 };
@@ -311,9 +338,9 @@ export default function AppointmentModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent className="sm:max-w-[550px]">
                 <DialogHeader>
-                    <DialogTitle>
+                    <DialogTitle className="text-xl">
                         {isNew ? 'Nova Consulta' : 'Detalhes da Consulta'}
                     </DialogTitle>
                     <DialogDescription>
@@ -323,11 +350,13 @@ export default function AppointmentModal({
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="grid gap-4 py-4">
+                <div className="grid gap-5 py-4">
                     {/* Título da consulta */}
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="title" className="text-right">
-                            Título
+                        <Label htmlFor="title" className="text-right font-medium">
+                            <span className="flex items-center justify-end gap-2">
+                                <Type className="h-4 w-4" /> Título
+                            </span>
                         </Label>
                         <Input
                             id="title"
@@ -340,15 +369,17 @@ export default function AppointmentModal({
 
                     {/* Paciente */}
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="patient" className="text-right flex items-center justify-end gap-2">
-                            <User className="h-4 w-4" /> Paciente
+                        <Label htmlFor="patient" className="text-right font-medium">
+                            <span className="flex items-center justify-end gap-2">
+                                <User className="h-4 w-4" /> Paciente
+                            </span>
                         </Label>
                         <div className="col-span-3">
                             <Select
                                 value={formData.extendedProps?.patientId || ''}
                                 onValueChange={(value) => handleSelectChange('extendedProps.patientId', value)}
                             >
-                                <SelectTrigger>
+                                <SelectTrigger className="w-full">
                                     <SelectValue placeholder="Selecione um paciente" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -362,50 +393,32 @@ export default function AppointmentModal({
                         </div>
                     </div>
 
-                    {/* Data */}
+                    {/* Data e Hora */}
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label className="text-right flex items-center justify-end gap-2">
-                            <Calendar className="h-4 w-4" /> Data
+                        <Label className="text-right font-medium">
+                            <span className="flex items-center justify-end gap-2">
+                                <CalendarIcon className="h-4 w-4" /> Data e Hora
+                            </span>
                         </Label>
                         <div className="col-span-3">
                             <div className="flex flex-col gap-2">
-                                <Input
-                                    type="date"
-                                    value={selectedDate ? format(selectedDate, 'yyyy-MM-dd') : ''}
-                                    onChange={(e) => {
-                                        if (e.target.value) {
-                                            setSelectedDate(new Date(e.target.value));
-                                        }
-                                    }}
-                                    className="w-full"
-                                />
+                                <div className="relative">
+                                    <DatePicker
+                                        selected={selectedDate}
+                                        onChange={handleDateTimeChange}
+                                        locale={ptBR}
+                                        showTimeSelect
+                                        timeFormat="HH:mm"
+                                        timeIntervals={15}
+                                        dateFormat="dd/MM/yyyy HH:mm"
+                                        timeCaption="Hora"
+                                        placeholderText="Selecione data e hora"
+                                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    />
+                                    <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                                </div>
                                 <p className="text-xs text-muted-foreground">
-                                    {selectedDate ? formatDate(selectedDate) : "Selecione uma data"}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Hora */}
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label className="text-right flex items-center justify-end gap-2">
-                            <Clock className="h-4 w-4" /> Hora
-                        </Label>
-                        <div className="col-span-3">
-                            <div className="flex flex-col gap-2">
-                                <Input
-                                    type="time"
-                                    value={selectedTime}
-                                    onChange={(e) => {
-                                        if (e.target.value) {
-                                            setSelectedTime(e.target.value);
-                                        }
-                                    }}
-                                    className="w-full"
-                                    step="900" // 15 minutos em segundos
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                    Formato 24h (ex: 09:00, 14:30)
+                                    {selectedDate ? formatDate(selectedDate) : "Selecione data e hora"}
                                 </p>
                             </div>
                         </div>
@@ -413,8 +426,10 @@ export default function AppointmentModal({
 
                     {/* Duração */}
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label className="text-right flex items-center justify-end gap-2">
-                            <Clock className="h-4 w-4" /> Duração
+                        <Label className="text-right font-medium">
+                            <span className="flex items-center justify-end gap-2">
+                                <Clock className="h-4 w-4" /> Duração
+                            </span>
                         </Label>
                         <div className="col-span-3">
                             <Select
@@ -436,17 +451,19 @@ export default function AppointmentModal({
                     </div>
 
                     {/* Resumo do agendamento */}
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label className="text-right">
-                            Resumo
+                    <div className="grid grid-cols-4 items-start gap-4">
+                        <Label className="text-right font-medium pt-2">
+                            <span className="flex items-center justify-end gap-2">
+                                <FileDigit className="h-4 w-4" /> Resumo
+                            </span>
                         </Label>
                         <div className="col-span-3 text-sm">
                             {selectedDate && selectedTime ? (
-                                <div className="p-2 bg-muted rounded-md">
-                                    <p>
+                                <div className="p-3 bg-muted rounded-md">
+                                    <p className="mb-1">
                                         <span className="font-medium">Data:</span> {formatDate(selectedDate)}
                                     </p>
-                                    <p>
+                                    <p className="mb-1">
                                         <span className="font-medium">Horário:</span> {selectedTime} às {
                                             format(
                                                 addMinutes(
@@ -462,22 +479,24 @@ export default function AppointmentModal({
                                     </p>
                                 </div>
                             ) : (
-                                <p className="text-muted-foreground">Selecione data e hora para ver o resumo</p>
+                                <p className="text-muted-foreground p-3 bg-muted rounded-md">Selecione data e hora para ver o resumo</p>
                             )}
                         </div>
                     </div>
 
                     {/* Tipo de consulta */}
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="type" className="text-right flex items-center justify-end gap-2">
-                            <Tag className="h-4 w-4" /> Tipo
+                        <Label htmlFor="type" className="text-right font-medium">
+                            <span className="flex items-center justify-end gap-2">
+                                <Tag className="h-4 w-4" /> Tipo
+                            </span>
                         </Label>
                         <div className="col-span-3">
                             <Select
                                 value={formData.extendedProps?.type || ''}
                                 onValueChange={(value) => handleSelectChange('extendedProps.type', value)}
                             >
-                                <SelectTrigger>
+                                <SelectTrigger className="w-full">
                                     <SelectValue placeholder="Selecione o tipo" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -499,15 +518,17 @@ export default function AppointmentModal({
 
                     {/* Plano de Saúde */}
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="healthPlan" className="text-right flex items-center justify-end gap-2">
-                            <FileText className="h-4 w-4" /> Plano
+                        <Label htmlFor="healthPlan" className="text-right font-medium">
+                            <span className="flex items-center justify-end gap-2">
+                                <FileText className="h-4 w-4" /> Plano
+                            </span>
                         </Label>
                         <div className="col-span-3">
                             <Select
                                 value={formData.extendedProps?.isPrivate ? 'private' : formData.extendedProps?.healthPlan?.id || ''}
                                 onValueChange={(value) => handleSelectChange('extendedProps.healthPlanId', value)}
                             >
-                                <SelectTrigger>
+                                <SelectTrigger className="w-full">
                                     <SelectValue placeholder="Selecione o plano" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -538,15 +559,17 @@ export default function AppointmentModal({
 
                     {/* Status */}
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="status" className="text-right">
-                            Status
+                        <Label htmlFor="status" className="text-right font-medium">
+                            <span className="flex items-center justify-end gap-2">
+                                <AlertCircle className="h-4 w-4" /> Status
+                            </span>
                         </Label>
                         <div className="col-span-3">
                             <Select
                                 value={formData.extendedProps?.status || 'pending'}
                                 onValueChange={(value) => handleSelectChange('extendedProps.status', value)}
                             >
-                                <SelectTrigger>
+                                <SelectTrigger className="w-full">
                                     <SelectValue placeholder="Selecione o status" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -580,9 +603,11 @@ export default function AppointmentModal({
                     </div>
 
                     {/* Observações */}
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="notes" className="text-right flex items-center justify-end gap-2">
-                            <FileText className="h-4 w-4" /> Observações
+                    <div className="grid grid-cols-4 items-start gap-4">
+                        <Label htmlFor="notes" className="text-right font-medium pt-2">
+                            <span className="flex items-center justify-end gap-2">
+                                <FileText className="h-4 w-4" /> Observações
+                            </span>
                         </Label>
                         <Textarea
                             id="notes"
@@ -595,7 +620,7 @@ export default function AppointmentModal({
                     </div>
                 </div>
 
-                <DialogFooter className="flex justify-between">
+                <DialogFooter className="flex justify-between pt-2 border-t">
                     {!isNew && (
                         <Button variant="destructive" onClick={handleDelete}>
                             Excluir

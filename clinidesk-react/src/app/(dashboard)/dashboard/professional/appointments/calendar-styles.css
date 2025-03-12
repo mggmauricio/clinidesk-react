@@ -306,11 +306,11 @@
 
 /* Destacar o domingo */
 .custom-calendar-container .fc-day-sun {
-    background-color: rgba(0, 0, 0, 0.02);
+    background-color: var(--muted, rgba(0, 0, 0, 0.02));
 }
 
 .custom-calendar-container .fc-col-header-cell.fc-day-sun {
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: var(--muted, rgba(0, 0, 0, 0.05));
 }
 
 /* Melhorar a visualização dos slots de meia hora */
@@ -326,11 +326,13 @@
 .custom-calendar-container .fc-col-header-cell {
     padding: 4px 0 !important;
     font-size: 0.85rem !important;
+    background-color: var(--muted, rgba(0, 0, 0, 0.02));
 }
 
 .custom-calendar-container .fc-col-header-cell-cushion {
     padding: 6px 4px !important;
     font-weight: 600 !important;
+    color: var(--foreground);
 }
 
 /* Compactar a visualização do calendário */
@@ -380,4 +382,144 @@
     font-size: 0.75rem;
     line-height: 1.2;
     text-align: center;
+}
+
+/* Estilos para o DatePicker */
+.react-datepicker {
+    font-family: var(--font-sans);
+    border-radius: 0.5rem;
+    border: 1px solid hsl(var(--border));
+    background-color: white;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.react-datepicker__header {
+    background-color: #f3f4f6;
+    border-bottom: 1px solid hsl(var(--border));
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    padding-top: 8px;
+}
+
+.react-datepicker__current-month,
+.react-datepicker-time__header,
+.react-datepicker-year-header {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #111827;
+}
+
+.react-datepicker__day-name,
+.react-datepicker__day,
+.react-datepicker__time-name {
+    color: #374151;
+    width: 2rem;
+    line-height: 2rem;
+    margin: 0.166rem;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected,
+.react-datepicker__time-list-item--selected {
+    background-color: #2563eb !important;
+    color: white !important;
+    border-radius: 0.25rem;
+}
+
+.react-datepicker__day:hover,
+.react-datepicker__time-list-item:hover {
+    background-color: #e5e7eb !important;
+    border-radius: 0.25rem;
+}
+
+.react-datepicker__day--today,
+.react-datepicker__time-list-item--selected {
+    font-weight: 600;
+}
+
+.react-datepicker__time-container {
+    border-left: 1px solid #e5e7eb;
+}
+
+.react-datepicker__time-container .react-datepicker__time {
+    background-color: white;
+}
+
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box {
+    width: 85px;
+}
+
+.react-datepicker__time-list-item {
+    height: auto !important;
+    padding: 8px 10px !important;
+}
+
+.react-datepicker__time-list-item--disabled {
+    color: #9ca3af !important;
+}
+
+.react-datepicker__navigation {
+    top: 8px;
+}
+
+.react-datepicker__navigation--previous {
+    left: 10px;
+}
+
+.react-datepicker__navigation--next {
+    right: 10px;
+}
+
+.react-datepicker__navigation-icon::before {
+    border-color: #374151;
+}
+
+.react-datepicker__year-read-view--down-arrow,
+.react-datepicker__month-read-view--down-arrow {
+    border-color: #374151;
+}
+
+/* Garantir que o fundo do time container seja sólido */
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list {
+    background-color: white;
+}
+
+/* Ajustar cores para compatibilidade com modo dark */
+.custom-calendar-container .fc-theme-standard td,
+.custom-calendar-container .fc-theme-standard th {
+    border-color: var(--border, #e5e7eb);
+}
+
+.custom-calendar-container .fc-theme-standard .fc-scrollgrid {
+    border-color: var(--border, #e5e7eb);
+}
+
+.custom-calendar-container .fc-timegrid-slot {
+    border-bottom-color: var(--border, #e5e7eb) !important;
+}
+
+.custom-calendar-container .fc-timegrid-slot.fc-timegrid-slot-label {
+    border-bottom-color: var(--border, #e5e7eb) !important;
+}
+
+.custom-calendar-container .fc-timegrid-axis-cushion,
+.custom-calendar-container .fc-col-header-cell-cushion {
+    color: var(--foreground);
+}
+
+.custom-calendar-container .fc-toolbar-title {
+    color: var(--foreground);
+}
+
+/* Ajustar cores dos dias da semana no cabeçalho */
+.custom-calendar-container .fc-col-header {
+    background-color: var(--muted, rgba(0, 0, 0, 0.02));
+}
+
+.custom-calendar-container .fc-col-header-cell {
+    color: var(--foreground);
+}
+
+.custom-calendar-container .fc-col-header-cell.fc-day-today {
+    background-color: var(--accent, rgba(0, 0, 0, 0.05));
 }
