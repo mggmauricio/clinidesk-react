@@ -1,82 +1,41 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ProfessionalDashboardPage() {
+    const { user } = useAuth();
+
     return (
-        <div className="space-y-6">
-            <h1 className="text-3xl font-bold">Dashboard do Profissional</h1>
+        <ProtectedRoute allowedUserTypes={["health_professional"]}>
+            <div className="p-6">
+                <h1 className="text-2xl font-bold mb-4">Dashboard do Profissional de Saúde</h1>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Consultas Hoje</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-4xl font-bold">5</p>
-                        <p className="text-muted-foreground">Próxima: 14:30</p>
-                    </CardContent>
-                </Card>
+                {user && (
+                    <div className="bg-white p-4 rounded-lg shadow mb-6">
+                        <h2 className="text-lg font-semibold mb-2">Bem-vindo, {user.username}!</h2>
+                        <p className="text-gray-600">Email: {user.email}</p>
+                        <p className="text-gray-600">ID: {user.user_id}</p>
+                    </div>
+                )}
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Pacientes</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-4xl font-bold">128</p>
-                        <p className="text-muted-foreground">+3 esta semana</p>
-                    </CardContent>
-                </Card>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="bg-white p-4 rounded-lg shadow">
+                        <h3 className="font-semibold mb-2">Próximos Agendamentos</h3>
+                        <p className="text-gray-600">Visualize seus próximos agendamentos aqui.</p>
+                    </div>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Faturamento</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-4xl font-bold">R$ 4.500</p>
-                        <p className="text-muted-foreground">Este mês</p>
-                    </CardContent>
-                </Card>
+                    <div className="bg-white p-4 rounded-lg shadow">
+                        <h3 className="font-semibold mb-2">Pacientes</h3>
+                        <p className="text-gray-600">Gerencie seus pacientes.</p>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg shadow">
+                        <h3 className="font-semibold mb-2">Financeiro</h3>
+                        <p className="text-gray-600">Acompanhe seus ganhos e pagamentos.</p>
+                    </div>
+                </div>
             </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Atividade Recente</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <ul className="space-y-4">
-                            <li className="border-b pb-2">
-                                <p className="font-medium">Consulta com Maria Oliveira</p>
-                                <p className="text-sm text-muted-foreground">Hoje, 10:30</p>
-                            </li>
-                            <li className="border-b pb-2">
-                                <p className="font-medium">Novo prontuário criado</p>
-                                <p className="text-sm text-muted-foreground">Ontem, 15:45</p>
-                            </li>
-                            <li>
-                                <p className="font-medium">Pagamento recebido</p>
-                                <p className="text-sm text-muted-foreground">Ontem, 09:15</p>
-                            </li>
-                        </ul>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Ações Rápidas</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-2 gap-4">
-                            <Button>Nova Consulta</Button>
-                            <Button>Novo Paciente</Button>
-                            <Button>Enviar Mensagem</Button>
-                            <Button>Gerar Relatório</Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
+        </ProtectedRoute>
     );
 } 

@@ -8,7 +8,9 @@ export interface HealthProfessional {
     specialization?: string;
     cnae?: string;
     is_independent: boolean;
+    birth_date: string;
     bot_phone?: string;
+    location_id?: string;
     created_at: string;
     updated_at: string;
 }

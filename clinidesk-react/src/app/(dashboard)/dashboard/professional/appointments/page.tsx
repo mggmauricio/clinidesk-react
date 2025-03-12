@@ -12,10 +12,13 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import ptBrLocale from '@fullcalendar/core/locales/pt-br';
 import './calendar-styles.css'; // Importar estilos personalizados
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
+import { toast } from 'sonner';
+import { format, addMinutes, parse } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 // Dados de exemplo para pacientes
 const MOCK_PATIENTS = [
@@ -515,7 +518,7 @@ export default function ProfessionalAppointmentsPage() {
     }, [currentView]);
 
     const eventContent = (arg: any) => {
-        const { status } = arg.event.extendedProps;
+        const { status, healthPlan, isPrivate } = arg.event.extendedProps;
 
         // Definir ícone com base no status
         let statusIcon = null;
@@ -529,15 +532,29 @@ export default function ProfessionalAppointmentsPage() {
             statusIcon = <div className="status-icon completed">✓✓</div>;
         }
 
-        // Calcular a duração do evento em horas
-        const start = new Date(arg.event.start);
-        const end = new Date(arg.event.end);
-        const durationMs = end.getTime() - start.getTime();
-        const durationHours = durationMs / (1000 * 60 * 60);
+        // Determinar a cor do plano de saúde
+        let healthPlanColor = '#9C27B0'; // Cor padrão para consultas particulares
+        if (healthPlan && !isPrivate) {
+            healthPlanColor = healthPlan.color;
+        }
 
         return (
-            <div className={`event-${status}`} style={{ height: '100%', width: '100%' }}>
-                <div className="fc-event-main-content">
+            <div className={`event-${status}`} style={{ height: '100%', width: '100%', position: 'relative' }}>
+                {/* Linha colorida do plano de saúde */}
+                <div
+                    className="health-plan-indicator"
+                    style={{
+                        position: 'absolute',
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        width: '4px',
+                        backgroundColor: healthPlanColor,
+                        borderTopLeftRadius: '4px',
+                        borderBottomLeftRadius: '4px'
+                    }}
+                />
+                <div className="fc-event-main-content" style={{ paddingLeft: '6px' }}>
                     <div className="fc-event-title">
                         {arg.event.title}
                     </div>
@@ -552,15 +569,35 @@ export default function ProfessionalAppointmentsPage() {
 
     // Função para atualizar as horas de trabalho
     const updateWorkHours = () => {
-        // Garantir que o formato está em 24h
-        const formattedStartTime = tempWorkHours.startTime.length === 5 ? tempWorkHours.startTime : `0${tempWorkHours.startTime}`;
-        const formattedEndTime = tempWorkHours.endTime.length === 5 ? tempWorkHours.endTime : `0${tempWorkHours.endTime}`;
+        // Validar formato de hora (HH:MM)
+        const timeRegex = /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/;
+
+        if (!timeRegex.test(tempWorkHours.startTime) || !timeRegex.test(tempWorkHours.endTime)) {
+            toast.error("Formato de hora inválido", {
+                description: "Por favor, use o formato 24h (HH:MM)"
+            });
+            return;
+        }
+
+        // Garantir que o formato está em 24h (HH:MM)
+        const formatTime = (time: string) => {
+            const [hours, minutes] = time.split(':');
+            return `${hours.padStart(2, '0')}:${minutes}`;
+        };
+
+        const formattedStartTime = formatTime(tempWorkHours.startTime);
+        const formattedEndTime = formatTime(tempWorkHours.endTime);
 
         setWorkHours({
             ...tempWorkHours,
             startTime: formattedStartTime,
             endTime: formattedEndTime
         });
+
+        toast.success("Horário de trabalho atualizado", {
+            description: `Horário definido: ${formattedStartTime} às ${formattedEndTime}`
+        });
+
         setIsWorkHoursModalOpen(false);
     };
 
@@ -785,24 +822,52 @@ export default function ProfessionalAppointmentsPage() {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="startTime">Horário de Início</Label>
-                                <Input
-                                    id="startTime"
-                                    type="time"
-                                    value={tempWorkHours.startTime}
-                                    onChange={(e) => setTempWorkHours({ ...tempWorkHours, startTime: e.target.value })}
-                                    lang="pt-BR"
-                                />
+                                <div className="relative">
+                                    <select
+                                        id="startTime"
+                                        value={tempWorkHours.startTime}
+                                        onChange={(e) => setTempWorkHours({ ...tempWorkHours, startTime: e.target.value })}
+                                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        {Array.from({ length: 24 }, (_, hour) => (
+                                            [0, 15, 30, 45].map(minute => {
+                                                const formattedHour = hour.toString().padStart(2, '0');
+                                                const formattedMinute = minute.toString().padStart(2, '0');
+                                                const timeValue = `${formattedHour}:${formattedMinute}`;
+                                                return (
+                                                    <option key={timeValue} value={timeValue}>
+                                                        {timeValue}
+                                                    </option>
+                                                );
+                                            })
+                                        )).flat()}
+                                    </select>
+                                </div>
                                 <p className="text-xs text-muted-foreground">Formato 24h (ex: 07:00)</p>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="endTime">Horário de Término</Label>
-                                <Input
-                                    id="endTime"
-                                    type="time"
-                                    value={tempWorkHours.endTime}
-                                    onChange={(e) => setTempWorkHours({ ...tempWorkHours, endTime: e.target.value })}
-                                    lang="pt-BR"
-                                />
+                                <div className="relative">
+                                    <select
+                                        id="endTime"
+                                        value={tempWorkHours.endTime}
+                                        onChange={(e) => setTempWorkHours({ ...tempWorkHours, endTime: e.target.value })}
+                                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        {Array.from({ length: 24 }, (_, hour) => (
+                                            [0, 15, 30, 45].map(minute => {
+                                                const formattedHour = hour.toString().padStart(2, '0');
+                                                const formattedMinute = minute.toString().padStart(2, '0');
+                                                const timeValue = `${formattedHour}:${formattedMinute}`;
+                                                return (
+                                                    <option key={timeValue} value={timeValue}>
+                                                        {timeValue}
+                                                    </option>
+                                                );
+                                            })
+                                        )).flat()}
+                                    </select>
+                                </div>
                                 <p className="text-xs text-muted-foreground">Formato 24h (ex: 19:00)</p>
                             </div>
                         </div>

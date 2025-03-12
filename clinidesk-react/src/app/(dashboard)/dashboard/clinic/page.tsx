@@ -1,101 +1,43 @@
 "use client";
 
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 export default function ClinicDashboardPage() {
+    const { user } = useAuth();
+
     return (
-        <div className="space-y-6">
-            <h1 className="text-3xl font-bold">Dashboard da Clínica</h1>
+        <ProtectedRoute allowedUserTypes={["clinic"]}>
+            <div className="p-6">
+                <h1 className="text-2xl font-bold mb-4">Dashboard da Clínica</h1>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Consultas Hoje</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-4xl font-bold">23</p>
-                        <p className="text-muted-foreground">5 profissionais</p>
-                    </CardContent>
-                </Card>
+                {user && (
+                    <div className="bg-white p-4 rounded-lg shadow mb-6">
+                        <h2 className="text-lg font-semibold mb-2">Bem-vinda, {user.username}!</h2>
+                        <p className="text-gray-600">Email: {user.email}</p>
+                        <p className="text-gray-600">ID: {user.user_id}</p>
+                    </div>
+                )}
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Pacientes</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-4xl font-bold">542</p>
-                        <p className="text-muted-foreground">+12 esta semana</p>
-                    </CardContent>
-                </Card>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="bg-white p-4 rounded-lg shadow">
+                        <h3 className="font-semibold mb-2">Profissionais</h3>
+                        <p className="text-gray-600">Gerencie os profissionais da clínica.</p>
+                    </div>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Profissionais</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-4xl font-bold">8</p>
-                        <p className="text-muted-foreground">2 novos este mês</p>
-                    </CardContent>
-                </Card>
+                    <div className="bg-white p-4 rounded-lg shadow">
+                        <h3 className="font-semibold mb-2">Agendamentos</h3>
+                        <p className="text-gray-600">Visualize todos os agendamentos da clínica.</p>
+                    </div>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Faturamento</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-4xl font-bold">R$ 18.750</p>
-                        <p className="text-muted-foreground">Este mês</p>
-                    </CardContent>
-                </Card>
+                    <div className="bg-white p-4 rounded-lg shadow">
+                        <h3 className="font-semibold mb-2">Financeiro</h3>
+                        <p className="text-gray-600">Acompanhe o faturamento da clínica.</p>
+                    </div>
+                </div>
             </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Profissionais Ativos Hoje</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <ul className="space-y-4">
-                            <li className="border-b pb-2 flex justify-between">
-                                <div>
-                                    <p className="font-medium">Dra. Ana Souza</p>
-                                    <p className="text-sm text-muted-foreground">Cardiologista</p>
-                                </div>
-                                <p className="text-sm font-medium">7 consultas</p>
-                            </li>
-                            <li className="border-b pb-2 flex justify-between">
-                                <div>
-                                    <p className="font-medium">Dr. Carlos Mendes</p>
-                                    <p className="text-sm text-muted-foreground">Ortopedista</p>
-                                </div>
-                                <p className="text-sm font-medium">5 consultas</p>
-                            </li>
-                            <li className="flex justify-between">
-                                <div>
-                                    <p className="font-medium">Dra. Mariana Lima</p>
-                                    <p className="text-sm text-muted-foreground">Pediatra</p>
-                                </div>
-                                <p className="text-sm font-medium">8 consultas</p>
-                            </li>
-                        </ul>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Ações Administrativas</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-2 gap-4">
-                            <Button>Adicionar Profissional</Button>
-                            <Button>Gerenciar Agenda</Button>
-                            <Button>Relatório Financeiro</Button>
-                            <Button>Configurar Clínica</Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
+        </ProtectedRoute>
     );
 } 

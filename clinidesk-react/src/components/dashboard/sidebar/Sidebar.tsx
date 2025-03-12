@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -50,36 +51,36 @@ export default function Sidebar({ userType, userName, userAvatar, onLogout, onTo
         {
             title: "Minha Agenda",
             path: "/dashboard/professional/appointments",
-            icon: <Calendar className="h-5 w-5" />,
+            icon: <Calendar className="h-6 w-6" />,
             userTypes: ["professional"]
         },
         {
             title: "Pacientes",
             path: "/dashboard/professional/patients",
-            icon: <Users className="h-5 w-5" />,
+            icon: <Users className="h-6 w-6" />,
             userTypes: ["professional"]
         },
         {
             title: "Bot",
             path: "/dashboard/professional/whatsapp",
-            icon: <Bot className="h-5 w-5" />,
+            icon: <Bot className="h-6 w-6" />,
             userTypes: ["professional"]
         },
         {
             title: "Meu Financeiro",
-            icon: <DollarSign className="h-5 w-5" />,
+            icon: <DollarSign className="h-6 w-6" />,
             userTypes: ["professional"],
             submenu: [
                 {
                     title: "Faturamento",
                     path: "/dashboard/professional/financial/billing",
-                    icon: <DollarSign className="h-5 w-5" />,
+                    icon: <DollarSign className="h-6 w-6" />,
                     userTypes: ["professional"]
                 },
                 {
                     title: "Relatórios",
                     path: "/dashboard/professional/financial/reports",
-                    icon: <FileText className="h-5 w-5" />,
+                    icon: <FileText className="h-6 w-6" />,
                     userTypes: ["professional"]
                 }
             ]
@@ -87,7 +88,7 @@ export default function Sidebar({ userType, userName, userAvatar, onLogout, onTo
         {
             title: "Configurações",
             path: "/dashboard/professional/settings",
-            icon: <Settings className="h-5 w-5" />,
+            icon: <Settings className="h-6 w-6" />,
             userTypes: ["professional"]
         },
 
@@ -95,42 +96,42 @@ export default function Sidebar({ userType, userName, userAvatar, onLogout, onTo
         {
             title: "Agenda",
             path: "/dashboard/clinic/appointments",
-            icon: <Calendar className="h-5 w-5" />,
+            icon: <Calendar className="h-6 w-6" />,
             userTypes: ["clinic"]
         },
         {
             title: "Pacientes",
             path: "/dashboard/clinic/patients",
-            icon: <Users className="h-5 w-5" />,
+            icon: <Users className="h-6 w-6" />,
             userTypes: ["clinic"]
         },
         {
             title: "Prontuários",
             path: "/dashboard/clinic/records",
-            icon: <FileText className="h-5 w-5" />,
+            icon: <FileText className="h-6 w-6" />,
             userTypes: ["clinic"]
         },
         {
             title: "Bot",
             path: "/dashboard/clinic/whatsapp",
-            icon: <Bot className="h-5 w-5" />,
+            icon: <Bot className="h-6 w-6" />,
             userTypes: ["clinic"]
         },
         {
             title: "Financeiro",
-            icon: <DollarSign className="h-5 w-5" />,
+            icon: <DollarSign className="h-6 w-6" />,
             userTypes: ["clinic"],
             submenu: [
                 {
                     title: "Faturamento",
                     path: "/dashboard/clinic/financial/billing",
-                    icon: <DollarSign className="h-5 w-5" />,
+                    icon: <DollarSign className="h-6 w-6" />,
                     userTypes: ["clinic"]
                 },
                 {
                     title: "Relatórios",
                     path: "/dashboard/clinic/financial/reports",
-                    icon: <FileText className="h-5 w-5" />,
+                    icon: <FileText className="h-6 w-6" />,
                     userTypes: ["clinic"]
                 }
             ]
@@ -138,13 +139,13 @@ export default function Sidebar({ userType, userName, userAvatar, onLogout, onTo
         {
             title: "Profissionais",
             path: "/dashboard/clinic/professionals",
-            icon: <User className="h-5 w-5" />,
+            icon: <User className="h-6 w-6" />,
             userTypes: ["clinic"]
         },
         {
             title: "Configurações",
             path: "/dashboard/clinic/settings",
-            icon: <Settings className="h-5 w-5" />,
+            icon: <Settings className="h-6 w-6" />,
             userTypes: ["clinic"]
         }
     ];
@@ -153,6 +154,12 @@ export default function Sidebar({ userType, userName, userAvatar, onLogout, onTo
     const toggleSidebar = () => {
         const newCollapsedState = !isCollapsed;
         setIsCollapsed(newCollapsedState);
+
+        // Fechar submenus quando a sidebar for recolhida
+        if (newCollapsedState) {
+            setExpandedMenus([]);
+        }
+
         if (onToggle) {
             onToggle(newCollapsedState);
         }
@@ -218,8 +225,8 @@ export default function Sidebar({ userType, userName, userAvatar, onLogout, onTo
                 </div>
 
                 {/* Menu items */}
-                <nav className="flex-1 overflow-y-auto py-4">
-                    <ul className="space-y-2 px-5">
+                <nav className="flex-1 overflow-y-auto py-6">
+                    <ul className="space-y-3 px-4">
                         {filteredMenuItems.map((item) => (
                             <li key={item.title}>
                                 {item.submenu ? (
@@ -229,10 +236,10 @@ export default function Sidebar({ userType, userName, userAvatar, onLogout, onTo
                                     >
                                         <button
                                             onClick={() => toggleSubmenu(item.title)}
-                                            className={`w-full flex items-center justify-between p-2 rounded-md ${expandedMenus.includes(item.title) ? "bg-background/10" : "hover:bg-background/5"
+                                            className={`w-full flex items-center justify-between p-3 rounded-md ${expandedMenus.includes(item.title) ? "bg-background/10" : "hover:bg-background/5"
                                                 } transition-colors ${isCollapsed ? "justify-center relative group" : ""}`}
                                         >
-                                            <div className="flex items-center gap-3">
+                                            <div className="flex items-center gap-4">
                                                 <div className={isCollapsed ? "relative" : ""}>
                                                     {item.icon}
                                                     {isCollapsed && (
@@ -243,18 +250,18 @@ export default function Sidebar({ userType, userName, userAvatar, onLogout, onTo
                                                         </div>
                                                     )}
                                                 </div>
-                                                {!isCollapsed && <span>{item.title}</span>}
+                                                {!isCollapsed && <span className="text-base">{item.title}</span>}
                                             </div>
                                             {!isCollapsed && (
                                                 <ChevronDown
-                                                    className={`h-4 w-4 transition-transform ${expandedMenus.includes(item.title) ? "rotate-180" : ""
+                                                    className={`h-5 w-5 transition-transform ${expandedMenus.includes(item.title) ? "rotate-180" : ""
                                                         }`}
                                                 />
                                             )}
                                         </button>
 
                                         {(expandedMenus.includes(item.title) || (isCollapsed && hoveringItem === item.title)) && (
-                                            <ul className={`space-y-1 mt-1 ${isCollapsed
+                                            <ul className={`space-y-2 mt-2 ${isCollapsed
                                                 ? "absolute left-full top-8 ml-2 bg-primary border border-border/20 rounded-md shadow-md p-2 min-w-48 z-50"
                                                 : "pl-10"
                                                 }`}>
@@ -262,13 +269,13 @@ export default function Sidebar({ userType, userName, userAvatar, onLogout, onTo
                                                     <li key={subIndex}>
                                                         <Link
                                                             href={subItem.path || "#"}
-                                                            className={`flex items-center p-2 rounded-md ${isActive(subItem.path)
+                                                            className={`flex items-center p-3 rounded-md ${isActive(subItem.path)
                                                                 ? "bg-background/20 font-medium"
                                                                 : "hover:bg-background/10"
                                                                 } transition-colors`}
                                                         >
                                                             {subItem.icon}
-                                                            <span className="ml-3">{subItem.title}</span>
+                                                            <span className="ml-4 text-base">{subItem.title}</span>
                                                         </Link>
                                                     </li>
                                                 ))}
@@ -278,7 +285,7 @@ export default function Sidebar({ userType, userName, userAvatar, onLogout, onTo
                                 ) : (
                                     <Link
                                         href={item.path || "#"}
-                                        className={`flex items-center gap-3 p-2 rounded-md ${isActive(item.path)
+                                        className={`flex items-center gap-4 p-3 rounded-md ${isActive(item.path)
                                             ? "bg-background/20 font-medium"
                                             : "hover:bg-background/10"
                                             } transition-colors ${isCollapsed ? "justify-center relative group" : ""}`}
@@ -293,7 +300,7 @@ export default function Sidebar({ userType, userName, userAvatar, onLogout, onTo
                                                 </div>
                                             )}
                                         </div>
-                                        {!isCollapsed && <span>{item.title}</span>}
+                                        {!isCollapsed && <span className="text-base">{item.title}</span>}
                                     </Link>
                                 )}
                             </li>
@@ -305,11 +312,11 @@ export default function Sidebar({ userType, userName, userAvatar, onLogout, onTo
                 <div className="p-4 border-t border-border/20">
                     <button
                         onClick={onLogout}
-                        className={`flex items-center gap-3 p-2 rounded-md text-primary-foreground hover:bg-background/10 transition-colors w-full ${isCollapsed ? "justify-center" : ""
+                        className={`flex items-center gap-4 p-3 rounded-md text-primary-foreground hover:bg-background/10 transition-colors w-full ${isCollapsed ? "justify-center" : ""
                             }`}
                     >
-                        <LogOut className="h-5 w-5" />
-                        {!isCollapsed && <span>Sair</span>}
+                        <LogOut className="h-6 w-6" />
+                        {!isCollapsed && <span className="text-base">Sair</span>}
                     </button>
                 </div>
             </div>

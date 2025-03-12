@@ -2,7 +2,7 @@
 
 /* Estilos para os botões */
 .custom-calendar-container .fc .fc-button {
-    border-radius: 4px;
+    border-radius: 0.25rem;
     font-weight: 500;
     padding: 0.3rem 0.5rem;
     transition: all 0.1s ease;
@@ -10,7 +10,7 @@
     border: none;
     font-size: 0.75rem;
     cursor: pointer;
-    margin: 0 1px;
+    margin: 0 0.0625rem;
 }
 
 .custom-calendar-container .fc .fc-button-primary {
@@ -21,13 +21,13 @@
 .custom-calendar-container .fc .fc-button-primary:hover {
     background-color: var(--accent);
     color: var(--accent-foreground);
-    transform: translateY(-1px);
+    transform: translateY(-0.0625rem);
 }
 
 .custom-calendar-container .fc .fc-button-primary:not(:disabled):active,
 .custom-calendar-container .fc .fc-button-primary:not(:disabled).fc-button-active {
-    background-color: var(--primary);
-    color: var(--primary-foreground);
+    background-color: var(--accent);
+    color: var(--accent-foreground);
     transform: translateY(0);
 }
 
@@ -39,6 +39,15 @@
     min-width: 2.8rem;
 }
 
+/* Estilos específicos para botões de visualização ativos */
+.custom-calendar-container .fc .fc-dayView-button.fc-button-active,
+.custom-calendar-container .fc .fc-weekView-button.fc-button-active,
+.custom-calendar-container .fc .fc-monthView-button.fc-button-active {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+    font-weight: 600;
+}
+
 /* Estilos para o botão hoje */
 .custom-calendar-container .fc .fc-today-button {
     text-transform: uppercase;
@@ -46,6 +55,11 @@
     letter-spacing: 0.02em;
     font-weight: 600;
     margin-left: 0.3rem;
+}
+
+.custom-calendar-container .fc .fc-today-button.fc-button-active {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
 }
 
 /* Estilos para os botões de navegação (prev/next) */
@@ -83,7 +97,7 @@
 /* Estilos para os eventos por status - com destaque visual */
 .custom-calendar-container .fc .event-confirmed {
     background-color: rgba(76, 175, 80, 1) !important;
-    border: 1px solid rgba(76, 175, 80, 1) !important;
+    border: 0.0625rem solid rgba(76, 175, 80, 1) !important;
     color: #000 !important;
     height: 100% !important;
     width: 100% !important;
@@ -92,7 +106,7 @@
 
 .custom-calendar-container .fc .event-pending {
     background-color: rgba(255, 193, 7, 1) !important;
-    border: 1px solid rgba(255, 193, 7, 1) !important;
+    border: 0.0625rem solid rgba(255, 193, 7, 1) !important;
     color: #000 !important;
     height: 100% !important;
     width: 100% !important;
@@ -103,7 +117,7 @@
     opacity: 1;
     text-decoration: line-through;
     background-color: rgba(244, 67, 54, 1) !important;
-    border: 1px solid rgba(244, 67, 54, 1) !important;
+    border: 0.0625rem solid rgba(244, 67, 54, 1) !important;
     color: #000 !important;
     height: 100% !important;
     width: 100% !important;
@@ -112,7 +126,7 @@
 
 .custom-calendar-container .fc .event-completed {
     background-color: rgba(33, 150, 243, 1) !important;
-    border: 1px solid rgba(33, 150, 243, 1) !important;
+    border: 0.0625rem solid rgba(33, 150, 243, 1) !important;
     color: #000 !important;
     height: 100% !important;
     width: 100% !important;
@@ -121,49 +135,44 @@
 /* Garantir que os eventos sejam clicáveis e ocupem o espaço correto */
 .custom-calendar-container .fc .fc-event {
     cursor: pointer !important;
-    padding: 1px 14px 1px 3px;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    padding: 0.0625rem 0.75rem 0.0625rem 0.1875rem;
+    border-radius: 0.25rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.15);
     min-height: auto;
     line-height: 1;
     margin: 0 !important;
     box-sizing: border-box !important;
+    overflow: hidden;
+    position: relative;
 }
 
 .custom-calendar-container .fc .fc-event * {
     pointer-events: none;
 }
 
-/* Ajuste para visualização de semana e dia */
-.custom-calendar-container .fc-timegrid-event {
-    padding: 0 !important;
-    margin: 0 !important;
-    border-radius: 4px !important;
+/* Estilo para o indicador de plano de saúde */
+.custom-calendar-container .fc .health-plan-indicator {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0.25rem;
+    border-top-left-radius: 0.25rem;
+    border-bottom-left-radius: 0.25rem;
+    z-index: 2;
 }
 
-/* Corrigir a visualização dos eventos */
-.custom-calendar-container .fc-timegrid-event.fc-event-mirror,
-.custom-calendar-container .fc-timegrid-event {
-    background-color: transparent !important;
-    border: none !important;
-    overflow: hidden !important;
-}
-
-/* Garantir que o conteúdo do evento seja visível */
-.custom-calendar-container .fc-event-main {
-    width: 100%;
-    height: 100%;
-}
-
-/* Ajuste para o conteúdo principal do evento */
+/* Ajuste para o conteúdo principal do evento com o indicador de plano */
 .custom-calendar-container .fc .fc-event-main-content {
     display: flex;
     flex-direction: column;
     gap: 0;
     height: 100%;
-    padding: 2px 0;
+    padding: 0.0625rem 0 0.0625rem 0.3125rem;
     align-items: center;
     justify-content: center;
+    position: relative;
+    z-index: 1;
 }
 
 /* Ajuste para o título e horário do evento */
@@ -173,13 +182,15 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 0.85rem;
+    font-size: 0.7rem;
     color: rgba(0, 0, 0, 0.9);
     text-align: center;
+    max-width: 100%;
+    padding: 0 0.125rem;
 }
 
 .custom-calendar-container .fc .fc-event-time {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     opacity: 0.9;
     font-weight: 600;
     color: rgba(0, 0, 0, 0.9);
@@ -189,12 +200,12 @@
 /* Estilos para os ícones de status */
 .custom-calendar-container .fc .status-icon {
     position: absolute;
-    right: 2px;
+    right: 0.0625rem;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 0.65rem;
-    width: 12px;
-    height: 12px;
+    font-size: 0.6rem;
+    width: 0.625rem;
+    height: 0.625rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -225,11 +236,11 @@
 .custom-calendar-container .fc-theme-standard td,
 .custom-calendar-container .fc-theme-standard th {
     border-color: var(--border, #e5e7eb);
-    border-width: 0.5px;
+    border-width: 0.03125rem;
 }
 
 .custom-calendar-container .fc-theme-standard .fc-scrollgrid {
-    border-width: 0.5px;
+    border-width: 0.03125rem;
     border-color: var(--border, #e5e7eb);
 }
 
@@ -259,9 +270,9 @@
 
 /* Ajustes para a visualização de mês */
 .custom-calendar-container .fc-daygrid-event {
-    margin-top: 1px !important;
-    margin-bottom: 1px !important;
-    padding: 2px 20px 2px 8px !important;
+    margin-top: 0.0625rem !important;
+    margin-bottom: 0.0625rem !important;
+    padding: 0.0625rem 0.875rem 0.0625rem 0.375rem !important;
 }
 
 /* Ajustes para garantir que os eventos ocupem o espaço correto */
@@ -281,7 +292,7 @@
 /* Estilos para garantir que os eventos ocupem o espaço correto */
 .custom-calendar-container .fc-timegrid-slot {
     height: 1.2em !important;
-    border-bottom: 1px dashed var(--border, #e5e7eb) !important;
+    border-bottom: 0.0625rem dashed var(--border, #e5e7eb) !important;
 }
 
 .custom-calendar-container .fc-timegrid-slot-lane {
@@ -289,19 +300,19 @@
 }
 
 .custom-calendar-container .fc-timegrid-slot-minor {
-    border-bottom: 1px dotted var(--border, #e5e7eb) !important;
+    border-bottom: 0.0625rem dotted var(--border, #e5e7eb) !important;
 }
 
 /* Destacar as horas cheias */
 .custom-calendar-container .fc-timegrid-slot.fc-timegrid-slot-label {
-    border-bottom: 1px solid var(--border, #e5e7eb) !important;
+    border-bottom: 0.0625rem solid var(--border, #e5e7eb) !important;
 }
 
 /* Ajustar o tamanho dos rótulos de hora */
 .custom-calendar-container .fc-timegrid-axis-cushion {
     font-size: 0.8rem;
     font-weight: 600;
-    padding: 2px 4px !important;
+    padding: 0.125rem 0.25rem !important;
 }
 
 /* Destacar o domingo */
@@ -324,13 +335,13 @@
 
 /* Ajustar o cabeçalho dos dias */
 .custom-calendar-container .fc-col-header-cell {
-    padding: 4px 0 !important;
+    padding: 0.25rem 0 !important;
     font-size: 0.85rem !important;
     background-color: var(--muted, rgba(0, 0, 0, 0.02));
 }
 
 .custom-calendar-container .fc-col-header-cell-cushion {
-    padding: 6px 4px !important;
+    padding: 0.375rem 0.25rem !important;
     font-weight: 600 !important;
     color: var(--foreground);
 }
@@ -348,17 +359,17 @@
 /* Ajustar visualização específica para dia e semana */
 .fc-timeGridDay-view .fc-timegrid-slot-label-cushion {
     font-size: 0.8rem !important;
-    padding: 1px 2px !important;
+    padding: 0.0625rem 0.125rem !important;
 }
 
 .fc-timeGridWeek-view .fc-timegrid-slot-label-cushion {
     font-size: 0.8rem !important;
-    padding: 1px 2px !important;
+    padding: 0.0625rem 0.125rem !important;
 }
 
 /* Reduzir o espaçamento entre os dias na visualização de semana */
 .fc-timeGridWeek-view .fc-col-header-cell {
-    padding: 2px 0 !important;
+    padding: 0.125rem 0 !important;
 }
 
 /* Esconder as labels de meia hora na visualização de semana */
@@ -373,14 +384,14 @@
 
 /* Ajustar o tamanho dos ícones de status para eventos menores */
 .custom-calendar-container .fc .fc-event-title {
-    font-size: 0.85rem;
-    line-height: 1.2;
+    font-size: 0.7rem;
+    line-height: 1.1;
     text-align: center;
 }
 
 .custom-calendar-container .fc .fc-event-time {
-    font-size: 0.75rem;
-    line-height: 1.2;
+    font-size: 0.65rem;
+    line-height: 1.1;
     text-align: center;
 }
 
@@ -388,17 +399,19 @@
 .react-datepicker {
     font-family: var(--font-sans);
     border-radius: 0.5rem;
-    border: 1px solid hsl(var(--border));
+    border: 0.0625rem solid hsl(var(--border));
     background-color: white;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 0.625rem 0.9375rem -0.1875rem rgba(0, 0, 0, 0.1), 0 0.25rem 0.375rem -0.125rem rgba(0, 0, 0, 0.05);
+    font-size: 0.875rem;
+    max-width: 100%;
 }
 
 .react-datepicker__header {
     background-color: #f3f4f6;
-    border-bottom: 1px solid hsl(var(--border));
+    border-bottom: 0.0625rem solid hsl(var(--border));
     border-top-left-radius: 0.5rem;
     border-top-right-radius: 0.5rem;
-    padding-top: 8px;
+    padding-top: 0.5rem;
 }
 
 .react-datepicker__current-month,
@@ -413,9 +426,20 @@
 .react-datepicker__day,
 .react-datepicker__time-name {
     color: #374151;
-    width: 2rem;
-    line-height: 2rem;
+    width: 1.7rem;
+    line-height: 1.7rem;
     margin: 0.166rem;
+}
+
+@media (max-width: 48rem) {
+
+    .react-datepicker__day-name,
+    .react-datepicker__day,
+    .react-datepicker__time-name {
+        width: 1.5rem;
+        line-height: 1.5rem;
+        margin: 0.1rem;
+    }
 }
 
 .react-datepicker__day--selected,
@@ -438,7 +462,7 @@
 }
 
 .react-datepicker__time-container {
-    border-left: 1px solid #e5e7eb;
+    border-left: 0.0625rem solid #e5e7eb;
 }
 
 .react-datepicker__time-container .react-datepicker__time {
@@ -446,12 +470,25 @@
 }
 
 .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box {
-    width: 85px;
+    width: 5.3125rem;
+}
+
+@media (max-width: 48rem) {
+    .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box {
+        width: 4.375rem;
+    }
 }
 
 .react-datepicker__time-list-item {
     height: auto !important;
-    padding: 8px 10px !important;
+    padding: 0.5rem 0.625rem !important;
+}
+
+@media (max-width: 48rem) {
+    .react-datepicker__time-list-item {
+        padding: 0.375rem 0.5rem !important;
+        font-size: 0.8rem;
+    }
 }
 
 .react-datepicker__time-list-item--disabled {
@@ -459,15 +496,15 @@
 }
 
 .react-datepicker__navigation {
-    top: 8px;
+    top: 0.5rem;
 }
 
 .react-datepicker__navigation--previous {
-    left: 10px;
+    left: 0.625rem;
 }
 
 .react-datepicker__navigation--next {
-    right: 10px;
+    right: 0.625rem;
 }
 
 .react-datepicker__navigation-icon::before {
@@ -482,6 +519,39 @@
 /* Garantir que o fundo do time container seja sólido */
 .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list {
     background-color: white;
+}
+
+/* Ajustes responsivos para o DatePicker em telas pequenas */
+@media (max-width: 40rem) {
+    .react-datepicker-popper {
+        width: 100%;
+        max-width: 20rem;
+        transform: none !important;
+        left: 50% !important;
+        margin-left: -10rem !important;
+    }
+
+    .react-datepicker {
+        width: 100%;
+        font-size: 0.8rem;
+    }
+
+    .react-datepicker__month-container {
+        float: none;
+        width: 100%;
+    }
+
+    .react-datepicker__time-container {
+        float: none;
+        width: 100%;
+        border-left: none;
+        border-top: 0.0625rem solid #e5e7eb;
+    }
+
+    .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box {
+        width: 100%;
+        max-height: 9.375rem;
+    }
 }
 
 /* Ajustar cores para compatibilidade com modo dark */
@@ -521,5 +591,63 @@
 }
 
 .custom-calendar-container .fc-col-header-cell.fc-day-today {
-    background-color: var(--accent, rgba(0, 0, 0, 0.05));
+    background-color: var(--primary, rgba(0, 0, 0, 0.05));
+}
+
+/* Forçar formato 24 horas nos inputs de horário */
+input[type="time"][data-force-24h="true"]::-webkit-datetime-edit-ampm-field {
+    display: none !important;
+}
+
+input[type="time"][data-force-24h="true"] {
+    -webkit-appearance: textfield;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* Estilos para Firefox */
+@-moz-document url-prefix() {
+    input[type="time"][data-force-24h="true"] {
+        -moz-appearance: textfield;
+        text-align: left;
+    }
+}
+
+/* Estilos para Edge e IE */
+@supports (-ms-ime-align:auto) {
+    input[type="time"][data-force-24h="true"]::-ms-clear {
+        display: none;
+    }
+}
+
+/* Ajustes responsivos para telas menores */
+@media (max-width: 48rem) {
+    .custom-calendar-container .fc .fc-event-title {
+        font-size: 0.65rem;
+    }
+
+    .custom-calendar-container .fc .fc-event-time {
+        font-size: 0.6rem;
+    }
+
+    .custom-calendar-container .fc .fc-event {
+        padding: 0.0625rem 0.625rem 0.0625rem 0.1875rem;
+    }
+
+    .custom-calendar-container .fc .status-icon {
+        width: 0.5rem;
+        height: 0.5rem;
+        font-size: 0.5rem;
+    }
+}
+
+/* Ajustes específicos para telas muito pequenas */
+@media (max-width: 30rem) {
+    .custom-calendar-container .fc .fc-event-title {
+        font-size: 0.6rem;
+    }
+
+    .custom-calendar-container .fc .fc-event-time {
+        font-size: 0.55rem;
+    }
 }

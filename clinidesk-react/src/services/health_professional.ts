@@ -2,7 +2,12 @@ import { apiFetch } from "@/services/api";
 import { HealthProfessional } from "@/models/health_professional";
 
 export const healthProfessionalService = {
-    async create(data: Omit<HealthProfessional, "id" | "created_at" | "updated_at">): Promise<HealthProfessional | null> {
+    async create(data: Omit<HealthProfessional, "id" | "created_at" | "updated_at"> & { password?: string }): Promise<HealthProfessional | null> {
+        console.log("healthProfessionalService.create - Data being sent:", {
+            ...data,
+            password: data.password ? "********" : undefined,
+            birth_date: data.birth_date // Mostrar o formato da data que está sendo enviada
+        });
         return apiFetch("/health-professionals", {
             method: "POST",
             body: JSON.stringify(data),

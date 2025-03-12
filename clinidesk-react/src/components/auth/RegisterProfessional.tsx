@@ -12,24 +12,59 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useViaCep } from "@/hooks/useViaCep";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { z } from "zod";
+import { validateCPF } from "@/validators/cpf";
+import { emailSchema } from "@/validators/email";
 import { healthProfessionalService } from "@/services/health_professional";
 import { createLocation } from "@/services/locations";
 import { useRouter } from "next/navigation";
 import { MaterialInput } from "@/components/ui/material-input";
-import { FaUser, FaLock, FaIdCard, FaPhone, FaEnvelope, FaBriefcase, FaBuilding, FaMapMarkerAlt, FaCity } from "react-icons/fa";
-import { MapPin } from "lucide-react";
+import { FaUser, FaLock, FaIdCard, FaPhone, FaEnvelope, FaBriefcase, FaBuilding, FaMapMarkerAlt, FaCity, FaCalendar } from "react-icons/fa";
+import { MapPin, Eye, EyeOff } from "lucide-react";
 
 // Schema de formulário combinado
-const FormSchema = HealthProfessionalSchema.extend({
+const FormSchema = z.object({
+    username: z.string().min(3, "O nome de usuário deve ter pelo menos 3 caracteres"),
+    password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+    password_confirmation: z.string().min(1, "Confirmação de senha é obrigatória"),
+    identification_document: z
+        .string()
+        .min(11, "CPF deve ter 11 dígitos")
+        .max(14, "CPF deve ter no máximo 14 dígitos")
+        .refine(validateCPF, { message: "CPF inválido" }),
+    full_name: z.string().min(2, "Nome completo obrigatório"),
+    phone_number: z.string().min(10, "Telefone deve ter no mínimo 10 caracteres"),
+    email: emailSchema,
+    specialization: z.string().optional(),
+    cnae: z.string().optional(),
+    is_independent: z.boolean(),
+    bot_phone: z.string().optional(),
+    location_id: z.string().optional(),
+    birth_date: z.string().min(1, "Data de nascimento é obrigatória"),
     location: LocationSchema,
     sem_numero: z.boolean().optional().default(false),
-});
+}).refine(
+    (data) => data.password === data.password_confirmation,
+    {
+        message: "As senhas não coincidem",
+        path: ["password_confirmation"],
+    }
+);
 
 type FormInputs = z.infer<typeof FormSchema>;
 
 // Componente para o passo de credenciais
 function CredentialsStep() {
     const { register, formState: { errors } } = useFormContext<FormInputs>();
+    const [showPassword, setShowPassword] = useState(false);
+    const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+
+    const togglePasswordConfirmationVisibility = () => {
+        setShowPasswordConfirmation(!showPasswordConfirmation);
+    };
 
     return (
         <div className="space-y-4">
@@ -44,22 +79,89 @@ function CredentialsStep() {
                 variant="outlined"
             />
 
-            <MaterialInput
-                label="Senha"
-                type="password"
-                {...register("password")}
-                startIcon={<FaLock />}
-                errorMessage={errors.password?.message}
-                required
-                variant="outlined"
-            />
+            <div className="relative">
+                <MaterialInput
+                    label="Senha"
+                    type={showPassword ? "text" : "password"}
+                    {...register("password")}
+                    startIcon={<FaLock />}
+                    errorMessage={errors.password?.message}
+                    required
+                    variant="outlined"
+                />
+                <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none z-10"
+                    tabIndex={-1}
+                >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+            </div>
+
+            <div className="relative">
+                <MaterialInput
+                    label="Confirmar Senha"
+                    type={showPasswordConfirmation ? "text" : "password"}
+                    {...register("password_confirmation")}
+                    startIcon={<FaLock />}
+                    errorMessage={errors.password_confirmation?.message}
+                    required
+                    variant="outlined"
+                />
+                <button
+                    type="button"
+                    onClick={togglePasswordConfirmationVisibility}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none z-10"
+                    tabIndex={-1}
+                >
+                    {showPasswordConfirmation ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+            </div>
         </div>
     );
 }
 
 // Componente para o passo de informações pessoais
 function PersonalInfoStep() {
-    const { register, formState: { errors } } = useFormContext<FormInputs>();
+    const { register, formState: { errors }, setValue, watch } = useFormContext<FormInputs>();
+
+    // Validação adicional para data de nascimento
+    const validateBirthDate = (value: string) => {
+        if (!value) return true;
+
+        // Verificar formato DD/MM/YYYY
+        if (!/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
+            return "Formato inválido. Use DD/MM/AAAA";
+        }
+
+        const [day, month, year] = value.split('/').map(Number);
+
+        // Verificar se o ano é válido (entre 1900 e o ano atual)
+        const currentYear = new Date().getFullYear();
+        if (year < 1900 || year > currentYear) {
+            return "Ano inválido";
+        }
+
+        // Verificar se o mês é válido (1-12)
+        if (month < 1 || month > 12) {
+            return "Mês inválido";
+        }
+
+        // Verificar se o dia é válido para o mês
+        const daysInMonth = new Date(year, month, 0).getDate();
+        if (day < 1 || day > daysInMonth) {
+            return "Dia inválido para este mês";
+        }
+
+        // Verificar se a data não é futura
+        const birthDate = new Date(year, month - 1, day);
+        if (birthDate > new Date()) {
+            return "Data não pode ser no futuro";
+        }
+
+        return true;
+    };
 
     return (
         <div className="space-y-4">
@@ -83,6 +185,20 @@ function PersonalInfoStep() {
                 replacement={{ X: /\d/ }}
                 required
                 variant="outlined"
+            />
+
+            <MaterialInput
+                label="Data de Nascimento"
+                {...register("birth_date", {
+                    validate: validateBirthDate
+                })}
+                startIcon={<FaCalendar />}
+                errorMessage={errors.birth_date?.message}
+                mask="XX/XX/XXXX"
+                replacement={{ X: /\d/ }}
+                required
+                variant="outlined"
+                placeholder="DD/MM/AAAA"
             />
 
             <MaterialInput
@@ -311,6 +427,7 @@ export default function RegisterHealthProfessional() {
     const defaultValues: FormInputs = {
         username: "",
         password: "",
+        password_confirmation: "",
         identification_document: "",
         full_name: "",
         phone_number: "",
@@ -319,6 +436,7 @@ export default function RegisterHealthProfessional() {
         cnae: "",
         is_independent: false,
         bot_phone: "",
+        birth_date: "",
         sem_numero: false,
         location: {
             zip_code: "",
@@ -341,7 +459,7 @@ export default function RegisterHealthProfessional() {
 
     // Observar mudanças no formulário e salvar apenas durante a sessão atual
     useEffect(() => {
-        const subscription = watch((value) => {
+        const subscription = watch((value: any) => {
             // Salvar os dados atuais do formulário no localStorage apenas para a sessão atual
             const currentValues = getValues();
             // Usar sessionStorage em vez de localStorage para limpar ao fechar a aba/navegador
@@ -361,11 +479,11 @@ export default function RegisterHealthProfessional() {
         switch (step) {
             case 1:
                 // Validar campos do step 1 (Credenciais)
-                isStepValid = await trigger(["username", "password"]);
+                isStepValid = await trigger(["username", "password", "password_confirmation"]);
                 break;
             case 2:
                 // Validar campos do step 2 (Informações Pessoais)
-                isStepValid = await trigger(["full_name", "identification_document", "phone_number", "email"]);
+                isStepValid = await trigger(["full_name", "identification_document", "birth_date", "phone_number", "email"]);
                 break;
             case 3:
                 // Validar campos do step 3 (Informações Profissionais)
@@ -456,7 +574,7 @@ export default function RegisterHealthProfessional() {
                 complement: data.location.complement?.trim() || "",
             };
 
-            console.log("Creating location:", locationData);
+            console.log("Creating location with data:", locationData);
             const createdLocation = await createLocation(locationData);
 
             console.log("Response from createLocation:", createdLocation);
@@ -484,12 +602,14 @@ export default function RegisterHealthProfessional() {
                 cnae: data.cnae,
                 is_independent: data.is_independent,
                 bot_phone: data.bot_phone?.replace(/\D/g, "") || "",
+                birth_date: data.birth_date,
                 location_id: locationId // Usar a variável separada para garantir
             };
 
             console.log("Creating health professional with data:", {
                 ...professionalData,
-                password: "********" // Ocultar senha no log
+                password: "********", // Ocultar senha no log
+                birth_date: professionalData.birth_date // Mostrar o formato da data que está sendo enviada
             });
 
             // Verificar explicitamente se o location_id está definido
@@ -498,15 +618,41 @@ export default function RegisterHealthProfessional() {
             }
 
             // Tentar criar o profissional com o location_id explícito
-            const createdProfessional = await healthProfessionalService.create({
+            const professionalDataWithLocation = {
                 ...professionalData,
                 location_id: locationId // Garantir que o location_id está sendo passado
+            };
+
+            console.log("Final professional data being sent to API:", {
+                ...{
+                    ...professionalDataWithLocation,
+                    birth_date: professionalDataWithLocation.birth_date // Mostrar o formato da data após transformação
+                },
+                password: "********" // Ocultar senha no log
             });
+
+            const createdProfessional = await healthProfessionalService.create(professionalDataWithLocation);
 
             console.log("Response from create health professional:", createdProfessional);
 
             if (!createdProfessional) {
                 throw new Error("Erro ao cadastrar profissional de saúde: Resposta vazia");
+            }
+
+            // Verificar se o profissional foi criado com o location_id correto
+            if (!createdProfessional.location_id) {
+                console.warn("Profissional criado sem location_id:", createdProfessional);
+
+                // Tentar atualizar o profissional com o location_id
+                console.log("Tentando atualizar o profissional com location_id:", locationId);
+                const updatedProfessional = await healthProfessionalService.update(
+                    createdProfessional.id,
+                    { location_id: locationId }
+                );
+
+                console.log("Profissional atualizado:", updatedProfessional);
+            } else {
+                console.log("Profissional criado com location_id:", createdProfessional.location_id);
             }
 
             setSuccessMessage("Cadastro realizado com sucesso!");
@@ -515,7 +661,7 @@ export default function RegisterHealthProfessional() {
             clearSavedForm();
 
             setTimeout(() => {
-                router.push("/health-professionals");
+                // router.push("/health-professionals");
             }, 2000);
         } catch (error) {
             console.error("Error submitting form:", error);
@@ -570,11 +716,8 @@ export default function RegisterHealthProfessional() {
     };
 
     return (
-        <div className="flex justify-center w-full py-8">
+        <div className="flex justify-center w-full py-1">
             <Card className="w-full max-w-2xl shadow-2xl border border-border bg-card text-card-foreground">
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-2xl font-bold text-center">Cadastro de Profissional de Saúde</CardTitle>
-                </CardHeader>
 
                 <CardContent className="p-6">
                     <StepIndicator />

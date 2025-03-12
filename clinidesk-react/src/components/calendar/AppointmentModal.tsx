@@ -338,8 +338,8 @@ export default function AppointmentModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[550px]">
-                <DialogHeader>
+            <DialogContent className="w-[95vw] max-w-[34.375rem] max-h-[90vh] overflow-y-auto p-3 sm:p-6">
+                <DialogHeader className="mb-2">
                     <DialogTitle className="text-xl">
                         {isNew ? 'Nova Consulta' : 'Detalhes da Consulta'}
                     </DialogTitle>
@@ -350,11 +350,11 @@ export default function AppointmentModal({
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="grid gap-5 py-4">
+                <div className="grid gap-3 py-2">
                     {/* Título da consulta */}
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="title" className="text-right font-medium">
-                            <span className="flex items-center justify-end gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+                        <Label htmlFor="title" className="sm:text-right font-medium">
+                            <span className="flex items-center sm:justify-end gap-2">
                                 <Type className="h-4 w-4" /> Título
                             </span>
                         </Label>
@@ -363,18 +363,18 @@ export default function AppointmentModal({
                             name="title"
                             value={formData.title || ''}
                             onChange={handleChange}
-                            className="col-span-3"
+                            className="col-span-1 sm:col-span-3"
                         />
                     </div>
 
                     {/* Paciente */}
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="patient" className="text-right font-medium">
-                            <span className="flex items-center justify-end gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+                        <Label htmlFor="patient" className="sm:text-right font-medium">
+                            <span className="flex items-center sm:justify-end gap-2">
                                 <User className="h-4 w-4" /> Paciente
                             </span>
                         </Label>
-                        <div className="col-span-3">
+                        <div className="col-span-1 sm:col-span-3">
                             <Select
                                 value={formData.extendedProps?.patientId || ''}
                                 onValueChange={(value) => handleSelectChange('extendedProps.patientId', value)}
@@ -382,7 +382,7 @@ export default function AppointmentModal({
                                 <SelectTrigger className="w-full">
                                     <SelectValue placeholder="Selecione um paciente" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="max-h-[40vh] overflow-y-auto">
                                     {patients.map((patient) => (
                                         <SelectItem key={patient.id} value={patient.id}>
                                             {patient.name}
@@ -394,13 +394,13 @@ export default function AppointmentModal({
                     </div>
 
                     {/* Data e Hora */}
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label className="text-right font-medium">
-                            <span className="flex items-center justify-end gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+                        <Label className="sm:text-right font-medium">
+                            <span className="flex items-center sm:justify-end gap-2">
                                 <CalendarIcon className="h-4 w-4" /> Data e Hora
                             </span>
                         </Label>
-                        <div className="col-span-3">
+                        <div className="col-span-1 sm:col-span-3">
                             <div className="flex flex-col gap-2">
                                 <div className="relative">
                                     <DatePicker
@@ -414,6 +414,8 @@ export default function AppointmentModal({
                                         timeCaption="Hora"
                                         placeholderText="Selecione data e hora"
                                         className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        popperClassName="react-datepicker-popper"
+                                        popperPlacement="bottom-start"
                                     />
                                     <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                                 </div>
@@ -425,13 +427,13 @@ export default function AppointmentModal({
                     </div>
 
                     {/* Duração */}
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label className="text-right font-medium">
-                            <span className="flex items-center justify-end gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+                        <Label className="sm:text-right font-medium">
+                            <span className="flex items-center sm:justify-end gap-2">
                                 <Clock className="h-4 w-4" /> Duração
                             </span>
                         </Label>
-                        <div className="col-span-3">
+                        <div className="col-span-1 sm:col-span-3">
                             <Select
                                 value={selectedDuration.toString()}
                                 onValueChange={(value) => setSelectedDuration(parseInt(value))}
@@ -451,13 +453,13 @@ export default function AppointmentModal({
                     </div>
 
                     {/* Resumo do agendamento */}
-                    <div className="grid grid-cols-4 items-start gap-4">
-                        <Label className="text-right font-medium pt-2">
-                            <span className="flex items-center justify-end gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 items-start gap-2 sm:gap-4">
+                        <Label className="sm:text-right font-medium pt-2">
+                            <span className="flex items-center sm:justify-end gap-2">
                                 <FileDigit className="h-4 w-4" /> Resumo
                             </span>
                         </Label>
-                        <div className="col-span-3 text-sm">
+                        <div className="col-span-1 sm:col-span-3 text-sm">
                             {selectedDate && selectedTime ? (
                                 <div className="p-3 bg-muted rounded-md">
                                     <p className="mb-1">
@@ -485,13 +487,13 @@ export default function AppointmentModal({
                     </div>
 
                     {/* Tipo de consulta */}
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="type" className="text-right font-medium">
-                            <span className="flex items-center justify-end gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+                        <Label htmlFor="type" className="sm:text-right font-medium">
+                            <span className="flex items-center sm:justify-end gap-2">
                                 <Tag className="h-4 w-4" /> Tipo
                             </span>
                         </Label>
-                        <div className="col-span-3">
+                        <div className="col-span-1 sm:col-span-3">
                             <Select
                                 value={formData.extendedProps?.type || ''}
                                 onValueChange={(value) => handleSelectChange('extendedProps.type', value)}
@@ -499,7 +501,7 @@ export default function AppointmentModal({
                                 <SelectTrigger className="w-full">
                                     <SelectValue placeholder="Selecione o tipo" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="max-h-[40vh] overflow-y-auto">
                                     {appointmentTypes.map((type) => (
                                         <SelectItem key={type.id} value={type.id}>
                                             <div className="flex items-center gap-2">
@@ -517,13 +519,13 @@ export default function AppointmentModal({
                     </div>
 
                     {/* Plano de Saúde */}
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="healthPlan" className="text-right font-medium">
-                            <span className="flex items-center justify-end gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+                        <Label htmlFor="healthPlan" className="sm:text-right font-medium">
+                            <span className="flex items-center sm:justify-end gap-2">
                                 <FileText className="h-4 w-4" /> Plano
                             </span>
                         </Label>
-                        <div className="col-span-3">
+                        <div className="col-span-1 sm:col-span-3">
                             <Select
                                 value={formData.extendedProps?.isPrivate ? 'private' : formData.extendedProps?.healthPlan?.id || ''}
                                 onValueChange={(value) => handleSelectChange('extendedProps.healthPlanId', value)}
@@ -531,7 +533,7 @@ export default function AppointmentModal({
                                 <SelectTrigger className="w-full">
                                     <SelectValue placeholder="Selecione o plano" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="max-h-[40vh] overflow-y-auto">
                                     <SelectItem value="private">
                                         <div className="flex items-center gap-2">
                                             <div
@@ -558,13 +560,13 @@ export default function AppointmentModal({
                     </div>
 
                     {/* Status */}
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="status" className="text-right font-medium">
-                            <span className="flex items-center justify-end gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+                        <Label htmlFor="status" className="sm:text-right font-medium">
+                            <span className="flex items-center sm:justify-end gap-2">
                                 <AlertCircle className="h-4 w-4" /> Status
                             </span>
                         </Label>
-                        <div className="col-span-3">
+                        <div className="col-span-1 sm:col-span-3">
                             <Select
                                 value={formData.extendedProps?.status || 'pending'}
                                 onValueChange={(value) => handleSelectChange('extendedProps.status', value)}
@@ -603,9 +605,9 @@ export default function AppointmentModal({
                     </div>
 
                     {/* Observações */}
-                    <div className="grid grid-cols-4 items-start gap-4">
-                        <Label htmlFor="notes" className="text-right font-medium pt-2">
-                            <span className="flex items-center justify-end gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 items-start gap-2 sm:gap-4">
+                        <Label htmlFor="notes" className="sm:text-right font-medium pt-2">
+                            <span className="flex items-center sm:justify-end gap-2">
                                 <FileText className="h-4 w-4" /> Observações
                             </span>
                         </Label>
@@ -614,19 +616,19 @@ export default function AppointmentModal({
                             name="extendedProps.notes"
                             value={formData.extendedProps?.notes || ''}
                             onChange={handleChange}
-                            className="col-span-3"
+                            className="col-span-1 sm:col-span-3"
                             rows={3}
                         />
                     </div>
                 </div>
 
-                <DialogFooter className="flex justify-between pt-2 border-t">
+                <DialogFooter className="flex flex-col sm:flex-row justify-between pt-2 border-t mt-2">
                     {!isNew && (
-                        <Button variant="destructive" onClick={handleDelete}>
+                        <Button variant="destructive" onClick={handleDelete} className="mb-2 sm:mb-0">
                             Excluir
                         </Button>
                     )}
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 w-full sm:w-auto justify-end">
                         <Button variant="outline" onClick={onClose}>
                             Cancelar
                         </Button>
