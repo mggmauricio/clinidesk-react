@@ -18,6 +18,7 @@ import {
     DollarSign,
     Settings,
     Building,
+    Bot,
     User
 } from "lucide-react";
 
@@ -59,9 +60,9 @@ export default function Sidebar({ userType, userName, userAvatar, onLogout, onTo
             userTypes: ["professional"]
         },
         {
-            title: "WhatsApp",
+            title: "Bot",
             path: "/dashboard/professional/whatsapp",
-            icon: <MessageSquare className="h-5 w-5" />,
+            icon: <Bot className="h-5 w-5" />,
             userTypes: ["professional"]
         },
         {
@@ -110,9 +111,9 @@ export default function Sidebar({ userType, userName, userAvatar, onLogout, onTo
             userTypes: ["clinic"]
         },
         {
-            title: "WhatsApp",
+            title: "Bot",
             path: "/dashboard/clinic/whatsapp",
-            icon: <MessageSquare className="h-5 w-5" />,
+            icon: <Bot className="h-5 w-5" />,
             userTypes: ["clinic"]
         },
         {
@@ -218,7 +219,7 @@ export default function Sidebar({ userType, userName, userAvatar, onLogout, onTo
 
                 {/* Menu items */}
                 <nav className="flex-1 overflow-y-auto py-4">
-                    <ul className="space-y-1 px-2">
+                    <ul className="space-y-2 px-5">
                         {filteredMenuItems.map((item) => (
                             <li key={item.title}>
                                 {item.submenu ? (
